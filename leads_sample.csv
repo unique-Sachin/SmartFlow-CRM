@@ -1,0 +1,6 @@
+firstName,lastName,email,status,source,score,company,phone,country
+Alice,Walker,alice.walker@example.com,new,website,45,Walker Solutions,+14155550101,USA
+Carlos,Gomez,carlos.gomez@example.com,qualified,referral,78,Gomez Tech,+34911223344,Spain
+Sophie,Martin,sophie.martin@example.com,contacted,social,62,Martin Consulting,+33123456789,France
+Rajiv,Sharma,rajiv.sharma@example.com,unqualified,event,28,Sharma Industries,+919812345678,India
+Linda,Nguyen,linda.nguyen@example.com,converted,cold_outreach,88,Nguyen Group,+61298765432,Australia 

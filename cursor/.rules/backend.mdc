@@ -1,0 +1,492 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# SmartFlow CRM - Backend Specifications
+
+## Technology Stack & Environment
+
+### Main Framework
+
+```
+Node.js with Express.js
+
+Key Packages:
+- express: Web framework
+- mongoose: MongoDB ODM
+- socket.io: Real-time features
+- jsonwebtoken: Authentication
+- bcryptjs: Password hashing
+- cors: CORS middleware
+- helmet: Security
+- morgan: Logging
+```
+
+### Development Tools
+
+```
+- nodemon: Development server
+- dotenv: Environment variables
+- jest: Testing
+- supertest: API testing
+- eslint: Code linting
+- prettier: Code formatting
+```
+
+## Database Specifications
+
+### MongoDB Configuration
+
+```
+Primary Database: MongoDB
+
+Reasons:
+- Flexible schema
+- Scalability
+- Document-based structure
+- JSON native support
+- Read operation optimization
+```
+
+### Database Design Principles
+
+```
+1. Indexing Strategy
+   - Compound indexes for frequent queries
+   - Text indexes for search functionality
+   - TTL indexes for temporary data
+
+2. Data Organization
+   - Strategic denormalization
+   - Efficient relationships
+   - Optimized query patterns
+
+3. Performance Considerations
+   - Proper data pagination
+   - Efficient aggregation pipelines
+   - Caching strategies
+```
+
+## Authentication & Authorization
+
+### JWT Implementation
+
+```
+Token Structure:
+1. Access Token
+   - Short lifetime (15-60 minutes)
+   - Contains: userId, role, permissions
+   - Used for API authentication
+
+2. Refresh Token
+   - Longer lifetime (7-14 days)
+   - Used to obtain new access tokens
+   - Stored securely with user reference
+```
+
+### Role-Based Access Control (RBAC)
+
+```
+Roles:
+1. Super Admin
+   - Full system access
+   - User management
+   - System configuration
+
+2. Sales Manager
+   - Team management
+   - Report access
+   - Deal approval
+
+3. Sales Representative
+   - Deal management
+   - Contact management
+   - Basic reporting
+
+4. Lead Gen Specialist
+   - Lead creation
+   - Basic contact management
+   - Limited access
+```
+
+## Database Schema Design
+
+### User Schema
+
+```javascript
+{
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: {
+    type: String,
+    enum: ['SUPER_ADMIN', 'SALES_MANAGER', 'SALES_REP', 'LEAD_GEN'],
+    required: true
+  },
+  company: { type: Schema.Types.ObjectId, ref: 'Company' },
+  profile: {
+    firstName: String,
+    lastName: String,
+    phone: String,
+    avatar: String
+  },
+  settings: {
+    notifications: {
+      email: Boolean,
+      inApp: Boolean,
+      desktop: Boolean
+    },
+    theme: { type: String, default: 'light' }
+  },
+  lastLogin: Date,
+  status: { type: String, default: 'active' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
+}
+```
+
+### Company Schema
+
+```javascript
+{
+  name: { type: String, required: true },
+  domain: { type: String, unique: true },
+  settings: {
+    dealStages: [{
+      name: String,
+      order: Number,
+      probability: Number
+    }],
+    leadSources: [String],
+    customFields: [{
+      name: String,
+      type: String,
+      options: [String]
+    }]
+  },
+  subscription: {
+    plan: String,
+    status: String,
+    features: [String]
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
+}
+```
+
+### Contact Schema
+
+```javascript
+{
+  company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+  basicInfo: {
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: String,
+    company: String,
+    position: String
+  },
+  customFields: { type: Map, of: Schema.Types.Mixed },
+  tags: [String],
+  assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
+  interactions: [{
+    type: String,
+    date: Date,
+    notes: String,
+    userId: { type: Schema.Types.ObjectId, ref: 'User' }
+  }],
+  aiPersona: {
+    traits: [String],
+    preferences: Schema.Types.Mixed,
+    lastUpdated: Date
+  },
+  status: { type: String, default: 'active' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
+}
+```
+
+### Deal Schema
+
+```javascript
+{
+  company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+  title: { type: String, required: true },
+  value: { type: Number, required: true },
+  stage: { type: String, required: true },
+  contacts: [{ type: Schema.Types.ObjectId, ref: 'Contact' }],
+  assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
+  probability: { type: Number, default: 0 },
+  activities: [{
+    type: String,
+    date: Date,
+    notes: String,
+    userId: { type: Schema.Types.ObjectId, ref: 'User' }
+  }],
+  aiInsights: {
+    nextSteps: [String],
+    riskFactors: [String],
+    winProbability: Number,
+    lastUpdated: Date
+  },
+  customFields: { type: Map, of: Schema.Types.Mixed },
+  closingDate: Date,
+  status: { type: String, default: 'open' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
+}
+```
+
+### AI Interaction Schema
+
+```javascript
+{
+  type: {
+    type: String,
+    enum: ['DEAL_COACH', 'PERSONA', 'OBJECTION', 'WIN_LOSS'],
+    required: true
+  },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  context: {
+    dealId: { type: Schema.Types.ObjectId, ref: 'Deal' },
+    contactId: { type: Schema.Types.ObjectId, ref: 'Contact' }
+  },
+  input: { type: String, required: true },
+  response: Schema.Types.Mixed,
+  effectiveness: Number,
+  createdAt: { type: Date, default: Date.now }
+}
+```
+
+## API Endpoints
+
+### Authentication Routes
+
+```
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh-token
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+```
+
+### User Routes
+
+```
+GET    /api/users
+POST   /api/users
+GET    /api/users/:id
+PUT    /api/users/:id
+DELETE /api/users/:id
+```
+
+### Contact Routes
+
+```
+GET    /api/contacts
+POST   /api/contacts
+GET    /api/contacts/:id
+PUT    /api/contacts/:id
+DELETE /api/contacts/:id
+GET    /api/contacts/:id/interactions
+POST   /api/contacts/:id/interactions
+```
+
+### Deal Routes
+
+```
+GET    /api/deals
+POST   /api/deals
+GET    /api/deals/:id
+PUT    /api/deals/:id
+DELETE /api/deals/:id
+GET    /api/deals/:id/activities
+POST   /api/deals/:id/activities
+```
+
+### AI Feature Routes
+
+```
+POST   /api/ai/deal-coach
+POST   /api/ai/persona-builder
+POST   /api/ai/objection-handler
+POST   /api/ai/win-loss-analysis
+```
+
+### Report Routes
+
+```
+GET    /api/reports/sales
+GET    /api/reports/leads
+GET    /api/reports/activities
+GET    /api/reports/ai-usage
+```
+
+## Security Implementation
+
+### Authentication Security
+
+```
+1. Password Requirements:
+   - Minimum 8 characters
+   - Mix of uppercase and lowercase
+   - Numbers and special characters
+   - Bcrypt hashing
+
+2. JWT Security:
+   - Short-lived access tokens
+   - Secure token storage
+   - Token rotation
+   - Blacklisting capabilities
+```
+
+### API Security
+
+```
+1. Request Validation:
+   - Input sanitization
+   - Schema validation
+   - Type checking
+   - File upload validation
+
+2. Security Headers:
+   - CORS configuration
+   - XSS protection
+   - Content Security Policy
+   - Rate limiting
+```
+
+### Data Protection
+
+```
+1. Encryption:
+   - Password hashing
+   - Sensitive data encryption
+   - Secure key storage
+
+2. Access Control:
+   - Role-based permissions
+   - Resource-level access
+   - API authentication
+   - Request validation
+```
+
+## Error Handling
+
+### Error Types
+
+```
+1. Validation Errors
+   - Invalid input
+   - Missing required fields
+   - Invalid format
+
+2. Authentication Errors
+   - Invalid credentials
+   - Token expired
+   - Insufficient permissions
+
+3. Business Logic Errors
+   - Resource not found
+   - Invalid operation
+   - Conflict errors
+
+4. System Errors
+   - Database errors
+   - External service errors
+   - Network issues
+```
+
+### Error Response Format
+
+```javascript
+{
+  status: "error",
+  code: "ERROR_CODE",
+  message: "User friendly message",
+  details: {
+    // Additional error details
+  }
+}
+```
+
+## Third-Party Integrations
+
+### OpenAI Integration
+
+```
+1. Configuration:
+   - API key management
+   - Model selection
+   - Request timeout
+   - Error handling
+
+2. Features:
+   - Deal coaching
+   - Persona building
+   - Objection handling
+   - Win/loss analysis
+```
+
+### Google Integration
+
+```
+1. Gmail Integration:
+   - OAuth2 authentication
+   - Email tracking
+   - Template management
+   - Attachment handling
+
+2. Calendar Integration:
+   - Event creation
+   - Meeting scheduling
+   - Availability checking
+   - Reminder setting
+```
+
+### WebSocket Implementation
+
+```
+1. Real-time Features:
+   - Chat functionality
+   - Notifications
+   - Deal updates
+   - Activity tracking
+
+2. Socket Events:
+   - Connection management
+   - Event handling
+   - Error handling
+   - Reconnection logic
+```
+
+## Performance Optimization
+
+### Caching Strategy
+
+```
+1. Data Caching:
+   - Frequently accessed data
+   - API response caching
+   - Static asset caching
+
+2. Query Optimization:
+   - Efficient indexes
+   - Query planning
+   - Aggregation optimization
+```
+
+### Rate Limiting
+
+```
+1. API Rate Limits:
+   - 100 requests/minute/user
+   - 10 file uploads/minute
+   - 50 AI requests/hour
+
+2. Monitoring:
+   - Usage tracking
+   - Limit notifications
+   - Abuse prevention
+```
+

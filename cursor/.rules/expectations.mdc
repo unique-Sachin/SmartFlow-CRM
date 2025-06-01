@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Developer Guidelines (MUST READ BEFORE CODING)
+
+To ensure that the application is built exactly as envisioned, the following instructions must be **strictly followed** throughout the development process.
+
+## 1. 🚫 Do NOT Make Assumptions
+
+**Rule:**  
+Do **not** make any assumption—regardless of its scale—without first discussing it with the product owner.
+
+**Why:**  
+Seemingly small assumptions (naming, layout behavior, data handling) can lead to large-scale misalignment. Before proceeding with any unclear requirement, **pause development and consult** with the product owner.
+
+## 2. ⚖️ Always Discuss Trade-offs When Multiple Approaches Exist
+
+**Rule:**  
+If there are multiple technical or design paths to solve a problem, **list the options**, provide their pros/cons, and consult the product owner for a decision.
+
+**Why:**  
+The product owner wants visibility into important decisions that may affect scalability, performance, maintainability, or user experience. Never decide on your own if there's more than one way to solve a task.
+
+## 3. ❓ Ask When Unsure About Architecture or Design
+
+**Rule:**  
+When in doubt about frontend architecture, backend logic, schema structure, component hierarchy, or tool integration, **ask immediately**.
+
+**Why:**  
+Speculative decisions lead to rework. Avoid unnecessary guesswork—**ask questions early** and get aligned before implementing.
+
+## 4. 🎨 Follow Design Language and API Contracts Religiously
+
+**Rule:**  
+Follow the provided:
+
+- ✅ Frontend Design Language
+- ✅ Backend Schema Design
+- ✅ API Route Contracts
+  **exactly as described**—with zero deviations unless explicitly approved.
+
+**Why:**  
+This ensures visual consistency, interoperability between frontend and backend, and predictable behavior.
+
+**Frontend Must Use:**
+
+- The specified **glassmorphism** theme
+- The defined **primary and secondary color palette**
+- The selected **font families**
+- The **layout spacing system** and **UI component patterns**
+- **Responsiveness across desktop and mobile**
+
+**Backend Must Follow:**
+
+- The documented **MongoDB schema**
+- The defined **API routes and request/response structures**
+- The **authentication & authorization flow**
+- The **OpenAI integration workflow**
+
+No undocumented additions, deletions, or restructuring should occur.
+
+## ✅ Summary of Non-Negotiables
+
+| Area                        | Instruction                                               |
+| --------------------------- | --------------------------------------------------------- |
+| Assumptions                 | Never assume – always ask                                 |
+| Multiple Solutions          | Present all options with trade-offs before implementation |
+| Unclear Design/Architecture | Stop and clarify before proceeding                        |
+| Frontend Design             | Follow strictly – colors, fonts, layout, responsiveness   |
+| Backend Schema & APIs       | Follow the provided schema and routes exactly             |
+
+**Failure to follow these will result in technical debt and mandatory rework.**
+

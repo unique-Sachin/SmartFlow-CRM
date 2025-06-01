@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFlow CRM - PRD Flowchart</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f9;
+            color: #212529;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2d3282;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .legend h3 {
+            color: #2d3282;
+            margin-top: 0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SmartFlow CRM - Product Requirements Document Flowchart</h1>
+
+        <!-- Product Overview & Core Features -->
+        <div class="section">
+            <div class="mermaid">
+                graph TB
+                    SmartFlow[SmartFlow CRM]
+                    
+                    %% Product Overview
+                    SmartFlow --> Overview[Product Overview]
+                    Overview --> Vision[Product Vision]
+                    Overview --> Audience[Target Audience]
+                    
+                    %% Core Features
+                    SmartFlow --> Features[Core Features]
+                    
+                    %% User Management
+                    Features --> UserMgmt[1. User Management]
+                    UserMgmt --> Roles[Role-Based Access]
+                    UserMgmt --> Auth[Authentication]
+                    
+                    %% AI Features
+                    Features --> AIFeatures[2. AI-Powered Features]
+                    AIFeatures --> DealCoach[Deal Coach AI]
+                    AIFeatures --> PersonaBuilder[Customer Persona Builder]
+                    AIFeatures --> ObjHandler[Objection Handler]
+                    AIFeatures --> WinLoss[Win/Loss Analyzer]
+                    
+                    %% Core CRM
+                    Features --> CRMFeatures[3. Core CRM Features]
+                    CRMFeatures --> ContactMgmt[Contact Management]
+                    CRMFeatures --> DealPipeline[Deal Pipeline]
+                    CRMFeatures --> LeadMgmt[Lead Management]
+                    
+                    %% Communication
+                    Features --> CommTools[4. Communication Tools]
+                    CommTools --> Internal[Internal Communication]
+                    CommTools --> External[External Communication]
+                    CommTools --> Notifications[Notification System]
+                    
+                    %% Document Management
+                    Features --> DocMgmt[5. Document Management]
+                    
+                    classDef primary fill:#2d3282,stroke:#1d2262,color:#fff
+                    classDef secondary fill:#6b4ce6,stroke:#5a3ed9,color:#fff
+                    classDef feature fill:#0acf83,stroke:#09b673,color:#fff
+                    classDef subfeature fill:#f8f9fa,stroke:#dee2e6,color:#212529
+                    
+                    class SmartFlow primary
+                    class Overview,Features secondary
+                    class UserMgmt,AIFeatures,CRMFeatures,CommTools,DocMgmt feature
+                    class Vision,Audience,Roles,Auth,DealCoach,PersonaBuilder,ObjHandler,WinLoss,ContactMgmt,DealPipeline,LeadMgmt,Internal,External,Notifications subfeature
+            </div>
+        </div>
+
+        <!-- Technical Specifications -->
+        <div class="section">
+            <div class="mermaid">
+                graph TB
+                    Tech[Technical Specifications]
+                    
+                    %% Technology Stack
+                    Tech --> Stack[Technology Stack]
+                    Stack --> Frontend[Frontend]
+                    Stack --> Backend[Backend]
+                    Stack --> AI[AI Integration]
+                    
+                    %% Integration
+                    Tech --> Integration[Integration Requirements]
+                    Integration --> Gmail[Gmail API]
+                    Integration --> Calendar[Google Calendar]
+                    Integration --> Webhook[Webhook Support]
+                    Integration --> WebSocket[WebSocket]
+                    
+                    %% Performance
+                    Tech --> Performance[Performance Requirements]
+                    Performance --> RateLimits[Rate Limits]
+                    Performance --> ResponseTimes[Response Times]
+                    
+                    classDef primary fill:#2d3282,stroke:#1d2262,color:#fff
+                    classDef secondary fill:#6b4ce6,stroke:#5a3ed9,color:#fff
+                    classDef feature fill:#0acf83,stroke:#09b673,color:#fff
+                    classDef subfeature fill:#f8f9fa,stroke:#dee2e6,color:#212529
+                    
+                    class Tech primary
+                    class Stack,Integration,Performance secondary
+                    class Frontend,Backend,AI,Gmail,Calendar,Webhook,WebSocket,RateLimits,ResponseTimes subfeature
+            </div>
+        </div>
+
+        <!-- Implementation Phases -->
+        <div class="section">
+            <div class="mermaid">
+                graph LR
+                    Implementation[Implementation Phases]
+                    
+                    Implementation --> P1[Phase 1:<br/>Foundation]
+                    Implementation --> P2[Phase 2:<br/>Core Data Models]
+                    Implementation --> P3[Phase 3:<br/>Essential Features]
+                    Implementation --> P4[Phase 4:<br/>Enhanced Features]
+                    Implementation --> P5[Phase 5:<br/>AI Integration]
+                    Implementation --> P6[Phase 6:<br/>Advanced Features]
+                    Implementation --> P7[Phase 7:<br/>Polish]
+                    
+                    classDef primary fill:#2d3282,stroke:#1d2262,color:#fff
+                    classDef must fill:#ff5e84,stroke:#ff4772,color:#fff
+                    classDef should fill:#0acf83,stroke:#09b673,color:#fff
+                    classDef could fill:#ffb648,stroke:#ffa42f,color:#fff
+                    classDef wont fill:#adb5bd,stroke:#9aa5ad,color:#fff
+                    
+                    class Implementation primary
+                    class P1,P2,P3 must
+                    class P4,P7 should
+                    class P5 could
+                    class P6 wont
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2d3282;"></div>
+                <span>Primary Components</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #6b4ce6;"></div>
+                <span>Major Features</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #0acf83;"></div>
+                <span>Feature Categories</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f8f9fa;"></div>
+                <span>Sub-features</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff5e84;"></div>
+                <span>Must Have (Phase 1-3)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffb648;"></div>
+                <span>Could Have (Phase 5)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #adb5bd;"></div>
+                <span>Won't Have (Phase 6)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html> 
