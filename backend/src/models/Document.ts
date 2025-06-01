@@ -34,6 +34,9 @@ export interface IDocument extends MongoDocument {
     downloadCount: number;
   };
   status: 'active' | 'archived' | 'deleted';
+  hasAccess(userId: Types.ObjectId, userRoles: string[]): boolean;
+  incrementDownloadCount(): Promise<void>;
+  addVersion(fileUrl: string, fileSize: number, modifiedBy: Types.ObjectId, changeDescription?: string): Promise<void>;
 }
 
 const documentSchema = new Schema<IDocument>({
@@ -179,8 +182,8 @@ documentSchema.pre('save', function(next) {
 documentSchema.methods.hasAccess = function(userId: Types.ObjectId, userRoles: string[]): boolean {
   if (this.accessControl.isPublic) return true;
   
-  const hasRoleAccess = this.accessControl.roles.some(role => userRoles.includes(role));
-  const hasUserAccess = this.accessControl.users.some(user => user.equals(userId));
+  const hasRoleAccess = this.accessControl.roles.some((role: string) => userRoles.includes(role));
+  const hasUserAccess = this.accessControl.users.some((user: Types.ObjectId) => user.equals(userId));
   const isOwner = this.uploadedBy.equals(userId);
   
   return hasRoleAccess || hasUserAccess || isOwner;

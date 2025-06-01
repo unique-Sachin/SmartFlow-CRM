@@ -1,9 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { Parser } from 'json2csv';
 import { Deal } from '../models/Deal';
 import { Lead } from '../models/Lead';
-import { User } from '../models/User';
-import { Contact } from '../models/Contact';
-import { Parser } from 'json2csv';
 
 export const getSalesMetrics = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -127,7 +125,11 @@ export const exportCSVReport = async (req: Request, res: Response, next: NextFun
         Stage: deal.stage,
         Probability: deal.probability,
         ExpectedCloseDate: deal.expectedCloseDate ? new Date(deal.expectedCloseDate).toISOString().slice(0, 10) : '',
-        AssignedTo: deal.assignedTo ? (deal.assignedTo.firstName ? `${deal.assignedTo.firstName} ${deal.assignedTo.lastName} (${deal.assignedTo.email})` : deal.assignedTo.toString()) : '',
+        AssignedTo: deal.assignedTo && typeof deal.assignedTo === 'object' && 'firstName' in deal.assignedTo
+          ? `${(deal.assignedTo as any).firstName} ${(deal.assignedTo as any).lastName} (${(deal.assignedTo as any).email})`
+          : deal.assignedTo
+            ? deal.assignedTo.toString()
+            : '',
       });
     });
     leads.forEach(lead => {
@@ -138,7 +140,11 @@ export const exportCSVReport = async (req: Request, res: Response, next: NextFun
         Email: lead.email,
         Status: lead.status,
         Score: lead.score,
-        AssignedTo: lead.assignedTo ? (lead.assignedTo.firstName ? `${lead.assignedTo.firstName} ${lead.assignedTo.lastName} (${lead.assignedTo.email})` : lead.assignedTo.toString()) : '',
+        AssignedTo: lead.assignedTo && typeof lead.assignedTo === 'object' && 'firstName' in lead.assignedTo
+          ? `${(lead.assignedTo as any).firstName} ${(lead.assignedTo as any).lastName} (${(lead.assignedTo as any).email})`
+          : lead.assignedTo
+            ? lead.assignedTo.toString()
+            : '',
         CreatedAt: lead.createdAt ? new Date(lead.createdAt).toISOString().slice(0, 10) : '',
       });
     });
