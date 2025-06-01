@@ -1,33 +1,32 @@
-import { styled } from '@mui/material/styles';
 import {
+  Assessment as AssessmentIcon,
+  AssignmentInd as AssignmentIndIcon,
+  Dashboard as DashboardIcon,
+  Description as DescriptionIcon,
+  Email as EmailIcon,
+  Lightbulb as LightbulbIcon,
+  Logout as LogoutIcon,
+  People as PeopleIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import {
+  Box,
+  Button,
   Drawer,
   List,
   ListItem,
-  ListItemIcon,
-  ListItemText,
   ListItemButton,
-  Box,
-  Typography,
-  Button,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  People as PeopleIcon,
-  Assessment as AssessmentIcon,
-  Email as EmailIcon,
-  Settings as SettingsIcon,
-  Lightbulb as LightbulbIcon,
-  Logout as LogoutIcon,
-  AssignmentInd as AssignmentIndIcon,
-  Description as DescriptionIcon,
-} from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useTheme } from '../../theme/ThemeProvider';
-import IconButton from '@mui/material/IconButton';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useAuth } from '../../contexts/AuthContext';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import { styled } from '@mui/material/styles';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../theme/ThemeProvider';
 
 const DRAWER_WIDTH = 280;
 

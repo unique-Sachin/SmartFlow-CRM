@@ -1,13 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import {
-  Container, Typography, Paper, List, ListItem, ListItemText, CircularProgress, Box, Button, ListItemButton,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Alert, IconButton, Tooltip
+  Alert,
+  Box, Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  List, ListItem, ListItemText,
+  MenuItem,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import Grow from '@mui/material/Grow';
 import Skeleton from '@mui/material/Skeleton';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 

@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Paper, Typography, TextField, Button, CircularProgress, List, ListItem, ListItemText, IconButton, Divider, Chip } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import SendIcon from '@mui/icons-material/Send';
+import { Box, Chip, CircularProgress, Divider, IconButton, List, ListItem, ListItemText, Paper, TextField, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const exampleQuestions = [

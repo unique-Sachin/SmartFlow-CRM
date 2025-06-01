@@ -1,35 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import {
+  Assignment as AssignmentIcon,
+  Business as BusinessIcon,
+  Email as EmailIcon,
+  FilterList as FilterIcon,
+  OpenInNew as OpenInNewIcon,
+  Person as PersonIcon,
+  TrendingUp as TrendingUpIcon,
+} from '@mui/icons-material';
 import {
   Box,
-  Grid,
-  Paper,
-  Typography,
   Button,
+  Chip,
+  Grow,
+  IconButton,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Divider,
-  LinearProgress,
-  Chip,
+  Paper,
   Skeleton,
-  Grow,
   Tooltip,
-  Avatar,
+  Typography,
   useMediaQuery
 } from '@mui/material';
-import {
-  TrendingUp as TrendingUpIcon,
-  Assignment as AssignmentIcon,
-  FilterList as FilterIcon,
-  Email as EmailIcon,
-  Person as PersonIcon,
-  Business as BusinessIcon,
-  OpenInNew as OpenInNewIcon,
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 

@@ -1,30 +1,31 @@
-import React, { useState } from 'react';
 import {
+  Assignment as AssignmentIcon,
+  Group as GroupIcon,
+  Message as MessageIcon,
+  AttachMoney as MoneyIcon,
+  Person as PersonIcon,
+  TrendingUp as TrendingUpIcon,
+} from '@mui/icons-material';
+import {
+  Avatar,
   Box,
-  Paper,
-  Typography,
   Button,
+  Divider,
+  Grow,
+  IconButton,
+  LinearProgress,
   List,
   ListItem,
-  ListItemText,
   ListItemSecondaryAction,
-  IconButton,
-  Divider,
-  LinearProgress,
-  Avatar,
+  ListItemText,
+  Paper,
   Skeleton,
-  Grow
+  Typography,
+  GridLegacy as Grid
+  
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import {
-  AttachMoney as MoneyIcon,
-  TrendingUp as TrendingUpIcon,
-  Group as GroupIcon,
-  Person as PersonIcon,
-  Message as MessageIcon,
-  Assignment as AssignmentIcon,
-} from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import React, { useState } from 'react';
 
 interface MetricCardProps {
   title: string;

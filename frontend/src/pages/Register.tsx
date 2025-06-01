@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
-  Container,
+  Alert,
   Box,
-  TextField,
   Button,
-  Typography,
+  Container,
+  IconButton,
+  InputAdornment,
   Link,
   Paper,
-  Alert,
-  InputAdornment,
-  IconButton,
-  MenuItem,
+  TextField,
+  Typography
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 type FormData = {

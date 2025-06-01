@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import {
   Box,
-  Paper,
-  Typography,
+  Chip,
+  Divider,
+  Grow,
   List,
   ListItem,
   ListItemText,
-  Chip,
-  Divider,
-  CircularProgress,
+  Paper,
   Skeleton,
-  Grow
+  Typography,
+  GridLegacy as Grid
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { useAuth } from '../../contexts/AuthContext';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const stages = [

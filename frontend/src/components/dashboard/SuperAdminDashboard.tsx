@@ -1,33 +1,28 @@
-import React from 'react';
 import {
+  Business as BusinessIcon,
+  People as PeopleIcon,
+  Settings as SettingsIcon,
+  TrendingUp as TrendingUpIcon
+} from '@mui/icons-material';
+import {
+  Avatar,
   Box,
-  Paper,
-  Typography,
   Button,
+  Divider,
+  Grow,
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Divider,
-  Avatar,
-  Tooltip,
+  Paper,
   Skeleton,
-  Grow
+  Tooltip,
+  Typography,
+  GridLegacy as Grid
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import {
-  People as PeopleIcon,
-  Business as BusinessIcon,
-  TrendingUp as TrendingUpIcon,
-  Settings as SettingsIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MetricCardProps {
   title: string;
