@@ -74,7 +74,6 @@ const Leads: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
-  const [editSuccess, setEditSuccess] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -103,13 +102,10 @@ const Leads: React.FC = () => {
   const [personaLoading, setPersonaLoading] = useState(false);
   const [personaError, setPersonaError] = useState<string | null>(null);
   const [personaData, setPersonaData] = useState<{ persona: string; traits: string[]; communicationStyle: string; recommendations: string } | null>(null);
-  const [personaLead, setPersonaLead] = useState<any | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
-  const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [importedLeads, setImportedLeads] = useState<any[]>([]);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -210,7 +206,6 @@ const Leads: React.FC = () => {
     setEditForm({ ...lead });
     setEditOpen(true);
     setEditError(null);
-    setEditSuccess(null);
   };
 
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -222,7 +217,6 @@ const Leads: React.FC = () => {
     if (!editForm) return;
     setEditLoading(true);
     setEditError(null);
-    setEditSuccess(null);
     try {
       const res = await fetch(`${API_URL}/leads/${editForm._id}`, {
         method: 'PUT',
@@ -236,7 +230,6 @@ const Leads: React.FC = () => {
       if (!res.ok) {
         throw new Error(data?.errors?.[0]?.msg || data?.error || 'Failed to update lead');
       }
-      setEditSuccess('Lead updated successfully!');
       setEditOpen(false);
       setEditForm(null);
       setAddSuccess('Lead updated successfully!'); // triggers reload
@@ -422,7 +415,6 @@ const Leads: React.FC = () => {
   };
 
   const handlePersonaClick = async (lead: any) => {
-    setPersonaLead(lead);
     setPersonaOpen(true);
     setPersonaLoading(true);
     setPersonaError(null);
@@ -444,7 +436,6 @@ const Leads: React.FC = () => {
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCsvFile(file);
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -460,7 +451,6 @@ const Leads: React.FC = () => {
   const handleImportLeads = async () => {
     setImportLoading(true);
     setImportError(null);
-    setImportSuccess(null);
     try {
       const leadsWithAssigned = importedLeads.map(l => ({
         ...l,
@@ -482,10 +472,8 @@ const Leads: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Failed to import leads');
-      setImportSuccess('Leads imported successfully!');
       setImportOpen(false);
       setImportedLeads([]);
-      setCsvFile(null);
       fetchLeads();
     } catch (err: any) {
       setImportError(err.message || 'Unknown error');
