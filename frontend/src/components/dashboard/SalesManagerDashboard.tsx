@@ -25,7 +25,8 @@ import {
   
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MetricCardProps {
   title: string;
@@ -111,56 +112,87 @@ const getInitials = (name: string) => {
   return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
 };
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const SalesManagerDashboard: React.FC = () => {
   const theme = useTheme();
-  // Mock data - replace with actual API calls
-  const metrics = {
-    monthlyRevenue: '$85,000',
-    targetRevenue: '$100,000',
-    progress: 85,
-    teamSize: 12,
-    activeDeals: 28,
-    conversionRate: '24%',
-  };
+  const { token } = useAuth();
+  const [metrics, setMetrics] = useState<any>(null);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(false); // Set to true to see skeletons
-  const teamMembers = [
-    { id: 1, name: 'Alice Johnson', role: 'Sales Representative', deals: 8, revenue: '$32,000' },
-    { id: 2, name: 'Bob Wilson', role: 'Sales Representative', deals: 6, revenue: '$28,000' },
-    { id: 3, name: 'Carol Smith', role: 'Lead Specialist', leads: 45, conversion: '28%' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch sales metrics and team members in parallel
+        const [metricsRes, usersRes] = await Promise.all([
+          fetch(`${API_URL}/reporting/sales-metrics`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }),
+          fetch(`${API_URL}/users`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }),
+        ]);
+        const metricsData = await metricsRes.json();
+        const usersData = await usersRes.json();
+        setMetrics(metricsData);
+        setTeamMembers(usersData.users || []);
+      } catch (err) {
+        setMetrics(null);
+        setTeamMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [token]);
+
+  // Prepare metrics for cards
+  const monthlyRevenue = metrics?.totalValue?.USD ? `$${Number(metrics.totalValue.USD).toLocaleString()}` : '-';
+  const progress = metrics?.totalValue?.USD && metrics?.targetRevenue ? Math.round((metrics.totalValue.USD / metrics.targetRevenue) * 100) : undefined;
+  const activeDeals = metrics?.totalDeals ?? '-';
+  const conversionRate = metrics?.conversionRate ? `${metrics.conversionRate.toFixed(2)}%` : '-';
 
   return (
     <Box sx={{ flexGrow: 1, position: 'relative' }}>
       <Grid container spacing={3}>
         {/* Metrics */}
         <Grid item xs={12} md={4}>
-          <MetricCard
-            title="Monthly Revenue"
-            value={metrics.monthlyRevenue}
-            icon={<MoneyIcon sx={{ fontSize: 32, color: 'white' }} />}
-            color="#2D3282"
-            progress={metrics.progress}
-            delay={0}
-          />
+          {loading ? (
+            <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 3 }} />
+          ) : (
+            <MetricCard
+              title="Monthly Revenue"
+              value={monthlyRevenue}
+              icon={<MoneyIcon sx={{ fontSize: 32, color: 'white' }} />}
+              color="#2D3282"
+              progress={progress}
+              delay={0}
+            />
+          )}
         </Grid>
         <Grid item xs={12} md={4}>
-          <MetricCard
-            title="Active Deals"
-            value={metrics.activeDeals}
-            icon={<TrendingUpIcon sx={{ fontSize: 32, color: 'white' }} />}
-            color="#1976d2"
-            delay={100}
-          />
+          {loading ? (
+            <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 3 }} />
+          ) : (
+            <MetricCard
+              title="Active Deals"
+              value={activeDeals}
+              icon={<TrendingUpIcon sx={{ fontSize: 32, color: 'white' }} />}
+              color="#1976d2"
+              delay={100}
+            />
+          )}
         </Grid>
         <Grid item xs={12} md={4}>
-          <MetricCard
-            title="Conversion Rate"
-            value={metrics.conversionRate}
-            icon={<AssignmentIcon sx={{ fontSize: 32, color: 'white' }} />}
-            color="#2e7d32"
-            delay={200}
-          />
+          {loading ? (
+            <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 3 }} />
+          ) : (
+            <MetricCard
+              title="Conversion Rate"
+              value={conversionRate}
+              icon={<AssignmentIcon sx={{ fontSize: 32, color: 'white' }} />}
+              color="#2e7d32"
+              delay={200}
+            />
+          )}
         </Grid>
 
         {/* Divider between metrics and list */}
@@ -208,24 +240,26 @@ const SalesManagerDashboard: React.FC = () => {
               </Box>
             ) : (
               <List>
-                {teamMembers.map((member, index) => (
-                  <Grow in timeout={500 + index * 120} key={member.id}>
-                    <ListItem sx={{ borderRadius: 2, mb: 1, transition: 'background 0.18s', '&:hover': { background: '#f5faff' } }}>
-                      <Avatar sx={{ bgcolor: '#2D3282', mr: 2, fontWeight: 600 }}>
-                        {getInitials(member.name)}
-                      </Avatar>
-                      <ListItemText
-                        primary={<Typography fontWeight={500}>{member.name}</Typography>}
-                        secondary={<Typography variant="body2" color="text.secondary">{member.role} • {'deals' in member ? `${member.deals} deals • ${member.revenue} revenue` : `${member.leads} leads • ${member.conversion} conversion`}</Typography>}
-                      />
-                      <ListItemSecondaryAction>
-                        <IconButton edge="end" aria-label="view profile">
-                          <PersonIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </Grow>
-                ))}
+                {teamMembers
+                  .filter(member => member.role === 'sales_representative' || member.role === 'lead_specialist')
+                  .map((member, index) => (
+                    <Grow in timeout={500 + index * 120} key={member._id}>
+                      <ListItem sx={{ borderRadius: 2, mb: 1, transition: 'background 0.18s', '&:hover': { background: '#f5faff' } }}>
+                        <Avatar sx={{ bgcolor: '#2D3282', mr: 2, fontWeight: 600 }}>
+                          {getInitials(`${member.firstName} ${member.lastName}`)}
+                        </Avatar>
+                        <ListItemText
+                          primary={<Typography fontWeight={500}>{member.firstName} {member.lastName}</Typography>}
+                          secondary={<Typography variant="body2" color="text.secondary">{member.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</Typography>}
+                        />
+                        <ListItemSecondaryAction>
+                          <IconButton edge="end" aria-label="view profile">
+                            <PersonIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    </Grow>
+                  ))}
               </List>
             )}
           </Paper>

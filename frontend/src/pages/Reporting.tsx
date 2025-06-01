@@ -199,7 +199,7 @@ const Reporting: React.FC = () => {
                 <Typography>Total Value:</Typography>
                 {sales?.totalValue && Object.entries(sales.totalValue).map(([currency, value]) => (
                   <Typography key={currency} variant="body2" sx={{ ml: 2 }}>
-                    {currency}: {value}
+                    {currency}: {String(value)}
                   </Typography>
                 ))}
                 <Typography>Won Deals:</Typography>
