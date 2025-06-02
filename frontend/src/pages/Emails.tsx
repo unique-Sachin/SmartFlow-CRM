@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, CircularProgress, Chip
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import EmailIcon from '@mui/icons-material/Email';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+  Box, Button,
+  Chip,
+  CircularProgress,
+  Container, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField,
+  Typography
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -40,7 +44,6 @@ const Emails: React.FC = () => {
   const [aiError, setAiError] = useState<string | null>(null);
   const [recipientOptions, setRecipientOptions] = useState<any[]>([]);
   const [recipientLoading, setRecipientLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Fetch emails
   const fetchEmails = async () => {
@@ -56,7 +59,6 @@ const Emails: React.FC = () => {
       const data = await res.json();
       setEmails(data.emails || []);
     } catch (err: any) {
-      setError('Failed to fetch emails');
     } finally {
       setLoading(false);
     }
