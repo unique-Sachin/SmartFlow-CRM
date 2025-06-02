@@ -1,9 +1,9 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
-  Container,
   IconButton,
   InputAdornment,
   Link,
@@ -79,117 +79,139 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(120deg, #f5f6fa 0%, #e3eaf6 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 5,
+      }}
+    >
+      <Paper
+        elevation={6}
         sx={{
-          marginTop: 8,
+          p: { xs: 3, sm: 5 },
+          borderRadius: 4,
+          minWidth: 340,
+          maxWidth: 420,
+          width: '100%',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Create your SmartFlow CRM Account
-          </Typography>
-
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="firstName"
-              label="First Name"
-              autoComplete="given-name"
-              value={formData.firstName}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="lastName"
-              label="Last Name"
-              autoComplete="family-name"
-              value={formData.lastName}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="email"
-              label="Email Address"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/login" variant="body2">
-                Already have an account? Sign in
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+        <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56, mb: 2, fontSize: 28, fontWeight: 700 }}>SF</Avatar>
+        <Typography variant="h5" fontWeight={600} mb={2} align="center">
+          Create your SmartFlow CRM account
+        </Typography>
+        {error && <Alert severity="error" sx={{ mb: 2, width: '100%' }}>{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <TextField
+            label="First Name"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            size="medium"
+            autoComplete="given-name"
+          />
+          <TextField
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            size="medium"
+            autoComplete="family-name"
+          />
+          <TextField
+            label="Email Address"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            size="medium"
+            autoComplete="email"
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            size="medium"
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="Confirm Password"
+            name="confirmPassword"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            size="medium"
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ mt: 3, mb: 2, fontWeight: 600, fontSize: 18, borderRadius: 2, py: 1.2 }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Signing up...' : 'Sign Up'}
+          </Button>
+        </Box>
+        <Typography sx={{ mt: 1, fontSize: 15 }}>
+          Already have an account?{' '}
+          <Link component={RouterLink} to="/login" underline="hover" fontWeight={600} color="primary.main">
+            Sign In
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }; 
