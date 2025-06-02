@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Login } from './pages/Login';
@@ -18,6 +18,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import NotFound from './pages/NotFound';
 import Documents from './pages/Documents';
 import AICoach from './pages/AICoach';
+import Chat from './pages/Chat';
 
 function App() {
   // Layout for all protected routes
@@ -30,16 +31,16 @@ function App() {
   );
 
   return (
-    <Router>
-        <CssBaseline />
+    <>
+      <CssBaseline />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <AuthProvider>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<ProtectedLayout />}>
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/contacts/:id" element={<ContactDetail />} />
               <Route path="/deals" element={<Deals />} />
@@ -49,13 +50,14 @@ function App() {
               <Route path="/reporting" element={<Reporting />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/ai-coach" element={<AICoach />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="*" element={<NotFound />} />
               {/* Add more protected routes here */}
             </Route>
           </Routes>
-        </LocalizationProvider>
         </AuthProvider>
-    </Router>
+      </LocalizationProvider>
+    </>
   );
 }
 

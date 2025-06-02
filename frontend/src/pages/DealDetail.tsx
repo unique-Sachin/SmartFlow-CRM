@@ -23,8 +23,8 @@ interface Deal {
   probability: number;
   expectedCloseDate: string;
   actualCloseDate?: string;
-  assignedTo: string;
-  contact: string;
+  assignedTo: string | { _id: string; firstName: string; lastName: string; email: string };
+  contact: string | { _id: string; firstName: string; lastName: string; email: string };
   company?: string;
   notes: string;
   tags: string[];
@@ -204,8 +204,12 @@ const DealDetail: React.FC = () => {
             <Typography>Expected Close: {new Date(deal.expectedCloseDate).toLocaleDateString()}</Typography>
             {deal.actualCloseDate && <Typography>Actual Close: {new Date(deal.actualCloseDate).toLocaleDateString()}</Typography>}
             <Typography>Priority: {deal.priority}</Typography>
-            <Typography>Assigned To: {deal.assignedTo}</Typography>
-            <Typography>Contact: {deal.contact}</Typography>
+            <Typography>
+              Assigned To: {typeof deal.assignedTo === 'object' && deal.assignedTo !== null ? `${deal.assignedTo.firstName} ${deal.assignedTo.lastName}` : deal.assignedTo}
+            </Typography>
+            <Typography>
+              Contact: {typeof deal.contact === 'object' && deal.contact !== null ? `${deal.contact.firstName} ${deal.contact.lastName}` : deal.contact}
+            </Typography>
             {deal.company && <Typography>Company: {deal.company}</Typography>}
             <Typography>Notes: {deal.notes || 'None'}</Typography>
             <Typography>Tags: {deal.tags.join(', ') || 'None'}</Typography>

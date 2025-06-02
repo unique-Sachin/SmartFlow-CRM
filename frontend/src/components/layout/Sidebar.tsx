@@ -27,6 +27,7 @@ import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../theme/ThemeProvider';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 const DRAWER_WIDTH = 280;
 
@@ -65,10 +66,11 @@ const navigationItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'Contacts', icon: <PeopleIcon />, path: '/contacts' },
   { text: 'Deals', icon: <AssessmentIcon />, path: '/deals' },
-  { text: 'Leads', icon: <AssignmentIndIcon />, path: '/leads', roles: ['super_admin', 'sales_manager', 'lead_specialist'] },
+  { text: 'Leads', icon: <AssignmentIndIcon />, path: '/leads', roles: ['super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'] },
   { text: 'Documents', icon: <DescriptionIcon />, path: '/documents' },
   { text: 'Reporting', icon: <AssessmentIcon />, path: '/reporting' },
   { text: 'AI Coach', icon: <LightbulbIcon />, path: '/ai-coach' },
+  { text: 'Chat', icon: <ChatBubbleOutlineIcon />, path: '/chat' },
   { text: 'Email', icon: <EmailIcon />, path: '/email' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ];
@@ -100,7 +102,7 @@ export const Sidebar = () => {
       </Logo>
       <List>
         {navigationItems.map((item) => {
-          if (item.text === 'Leads' && user && !['super_admin', 'sales_manager', 'lead_specialist'].includes(user.role)) {
+          if (item.text === 'Leads' && user && !['super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'].includes(user.role)) {
             return null;
           }
           return (

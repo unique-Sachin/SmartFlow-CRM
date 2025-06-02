@@ -7,6 +7,7 @@ import {
   addInteractionValidation,
   validateContactId
 } from '../middleware/contactValidation';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -17,9 +18,9 @@ router.get('/', ContactController.getAll);
 // Get contact by ID
 router.get('/:id', validateContactId, ContactController.getById);
 // Update contact
-router.put('/:id', validateContactId, validate(updateContactValidation), ContactController.update);
+router.put('/:id', authenticate, authorize('super_admin', 'sales_manager', 'sales_representative'), validateContactId, validate(updateContactValidation), ContactController.update);
 // Delete contact
-router.delete('/:id', validateContactId, ContactController.delete);
+router.delete('/:id', authenticate, authorize('super_admin', 'sales_manager', 'sales_representative'), validateContactId, ContactController.delete);
 // Add interaction to contact
 router.post('/:id/interactions', validateContactId, validate(addInteractionValidation), ContactController.addInteraction);
 

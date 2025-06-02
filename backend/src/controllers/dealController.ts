@@ -48,7 +48,9 @@ const getAll = async (req: ExpressRequest, res: Response) => {
 
 const getById = async (req: ExpressRequest, res: Response) => {
   try {
-    const deal = await Deal.findById(req.params.id);
+    const deal = await Deal.findById(req.params.id)
+      .populate('assignedTo', 'firstName lastName email')
+      .populate('contact', 'firstName lastName email');
     if (!deal) {
       return res.status(404).json({ error: 'Deal not found' });
     }

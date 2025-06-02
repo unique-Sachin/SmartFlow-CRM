@@ -59,9 +59,11 @@ export const createLeadValidation: ValidationChain[] = [
     .withMessage('Score must be between 0 and 100'),
 
   body('assignedTo')
-    .notEmpty()
-    .withMessage('Assigned user is required')
-    .isMongoId()
+    .custom((value) => {
+      if (!value) return true; // allow empty or undefined (unassigned)
+      // Only validate as MongoId if value is present
+      return /^[0-9a-fA-F]{24}$/.test(value);
+    })
     .withMessage('Invalid user ID'),
 
   body('budget.amount')

@@ -28,12 +28,15 @@ import Skeleton from '@mui/material/Skeleton';
 import Papa from 'papaparse';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const statusOptions = [
-  'new', 'contacted', 'qualified', 'unqualified', 'converted', 'lost'
+  'new', 'contacted', 'qualified', 'unqualified', 'lost'
 ];
 const sourceOptions = [
   'website', 'referral', 'social', 'event', 'cold_outreach', 'other'
@@ -106,6 +109,8 @@ const Leads: React.FC = () => {
   const [importError, setImportError] = useState<string | null>(null);
   const [importedLeads, setImportedLeads] = useState<any[]>([]);
 
+  const navigate = useNavigate();
+
   const fetchLeads = async () => {
     setLoading(true);
     setError(null);
@@ -135,7 +140,7 @@ const Leads: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user || !['super_admin', 'sales_manager', 'lead_specialist'].includes(user.role)) return;
+    if (!user || !['super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'].includes(user.role)) return;
     fetchLeads();
     fetchUsers();
   }, [user, token, addSuccess]);
@@ -160,11 +165,6 @@ const Leads: React.FC = () => {
     setAddLoading(true);
     setAddError(null);
     setAddSuccess(null);
-    if (!form.assignedTo) {
-      setAddError('Assigned To is required.');
-      setAddLoading(false);
-      return;
-    }
     // Prepare lead data with required metadata fields
     const leadData: any = {
       ...form,
@@ -231,7 +231,8 @@ const Leads: React.FC = () => {
       }
       setEditOpen(false);
       setEditForm(null);
-      setAddSuccess('Lead updated successfully!'); // triggers reload
+      setAddSuccess('Lead updated successfully!');
+      fetchLeads();
     } catch (err: any) {
       setEditError(err.message || 'Unknown error');
     } finally {
@@ -481,23 +482,32 @@ const Leads: React.FC = () => {
     }
   };
 
-  if (!user || !['super_admin', 'sales_manager', 'lead_specialist'].includes(user.role)) {
+  if (!user || !['super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'].includes(user.role)) {
     return <Container sx={{ mt: 4 }}><Alert severity="error">Access denied.</Alert></Container>;
   }
+
+  // Filter leads for sales representatives and exclude converted leads for all roles
+  const visibleLeads = user.role === 'sales_representative'
+    ? leads.filter(lead => (lead.assignedTo && (lead.assignedTo._id === user.id || lead.assignedTo === user.id)) && lead.status !== 'converted')
+    : leads.filter(lead => lead.status !== 'converted');
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>Lead Management</Typography>
       <Box mb={2} display="flex" justifyContent="flex-end" gap={2}>
-        <Button variant="contained" color="primary" onClick={() => {
-          setAddOpen(true);
-          setForm(f => ({ ...f, assignedTo: users[0]?._id || '' }));
-        }}>
-          Add Lead
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={() => setImportOpen(true)}>
-          Import Leads
-        </Button>
+        {user.role !== 'sales_representative' && (
+          <>
+            <Button variant="contained" color="primary" onClick={() => {
+              setAddOpen(true);
+              setForm(f => ({ ...f, assignedTo: '' }));
+            }}>
+              Add Lead
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={() => setImportOpen(true)}>
+              Import Leads
+            </Button>
+          </>
+        )}
       </Box>
       <Paper sx={{ p: 2 }}>
         {loading ? (
@@ -510,7 +520,7 @@ const Leads: React.FC = () => {
           <Alert severity="error">{error}</Alert>
         ) : (
           <List>
-            {leads.map(lead => (
+            {visibleLeads.map(lead => (
               <Grow in={true} timeout={500} key={lead._id}>
                 <ListItem
                   divider
@@ -544,25 +554,32 @@ const Leads: React.FC = () => {
                       </span>
                     </>}
                   />
+                  {/* Only show these actions for non-sales_representative roles */}
+                  {user.role !== 'sales_representative' && <>
+                    <Tooltip title="Edit Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleEditClick(lead)}><EditIcon /></IconButton></Tooltip>
+                    <Tooltip title="Delete Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} color="error" onClick={() => handleDeleteClick(lead)}><DeleteIcon /></IconButton></Tooltip>
+                    <Tooltip title="Assign Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleAssignClick(lead)}><AssignmentIndIcon /></IconButton></Tooltip>
+                    <Tooltip title="Update Score"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleScoreClick(lead)}><StarIcon /></IconButton></Tooltip>
+                    <Tooltip title="Nurturing"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleNurtureClick(lead)}><TrackChangesIcon /></IconButton></Tooltip>
+                  </>}
+                  {/* AI Persona Profile is available to all */}
                   <Tooltip title="AI Persona Profile">
                     <IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handlePersonaClick(lead)}><SmartToyIcon /></IconButton>
                   </Tooltip>
-                  <Tooltip title="Edit Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleEditClick(lead)}><EditIcon /></IconButton></Tooltip>
-                  <Tooltip title="Delete Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} color="error" onClick={() => handleDeleteClick(lead)}><DeleteIcon /></IconButton></Tooltip>
-                  <Tooltip title="Assign Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleAssignClick(lead)}><AssignmentIndIcon /></IconButton></Tooltip>
-                  <Tooltip title="Update Score"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleScoreClick(lead)}><StarIcon /></IconButton></Tooltip>
-                  <Tooltip title="Nurturing"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleNurtureClick(lead)}><TrackChangesIcon /></IconButton></Tooltip>
-                  <Tooltip title="Convert to Deal">
-                    <span>
-                      <IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleConvertClick(lead)} disabled={lead.status === 'converted'}>
-                        <MonetizationOnIcon color={lead.status === 'converted' ? 'disabled' : 'primary'} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
+                  {/* Convert to Deal: Only show if user is allowed (backend will enforce too) */}
+                  {(['super_admin', 'sales_manager', 'sales_representative'].includes(user.role)) && (
+                    <Tooltip title="Convert to Deal">
+                      <span>
+                        <IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleConvertClick(lead)} disabled={lead.status === 'converted'}>
+                          <MonetizationOnIcon color={lead.status === 'converted' ? 'disabled' : 'primary'} />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  )}
                 </ListItem>
               </Grow>
             ))}
-            {leads.length === 0 && <Typography>No leads found.</Typography>}
+            {visibleLeads.length === 0 && <Typography>No leads found.</Typography>}
           </List>
         )}
       </Paper>
@@ -584,7 +601,7 @@ const Leads: React.FC = () => {
               ))}
             </TextField>
             <TextField label="Score" name="score" value={form.score} onChange={handleFormChange} required fullWidth type="number" inputProps={{ min: 0, max: 100 }} />
-            <TextField select label="Assigned To" name="assignedTo" value={form.assignedTo} onChange={handleFormChange} fullWidth required>
+            <TextField select label="Assigned To" name="assignedTo" value={form.assignedTo} onChange={handleFormChange} fullWidth>
               <MenuItem value="">Unassigned</MenuItem>
               {users.map(u => (
                 <MenuItem key={u._id} value={u._id}>{u.firstName} {u.lastName}</MenuItem>
@@ -716,14 +733,12 @@ const Leads: React.FC = () => {
               fullWidth
               inputProps={{ min: 0 }}
             />
-            <TextField
+            <DatePicker
               label="Expected Close Date"
-              type="date"
-              value={convertForm.expectedCloseDate}
-              onChange={e => setConvertForm(f => ({ ...f, expectedCloseDate: e.target.value }))}
-              required
-              fullWidth
-              InputLabelProps={{ shrink: true }}
+              value={convertForm.expectedCloseDate ? dayjs(convertForm.expectedCloseDate, 'YYYY-MM-DD') : null}
+              onChange={date => setConvertForm(f => ({ ...f, expectedCloseDate: date ? date.format('YYYY-MM-DD') : '' }))}
+              format="DD/MM/YYYY"
+              slotProps={{ textField: { required: true, fullWidth: true } }}
             />
             <TextField
               label="Currency"
@@ -741,7 +756,7 @@ const Leads: React.FC = () => {
             {convertSuccess && convertDeal && (
               <Alert severity="success">
                 {convertSuccess} <br />
-                <Button size="small" href={`/deals/${convertDeal._id}`} variant="outlined" sx={{ mt: 1 }}>
+                <Button size="small" onClick={() => navigate(`/deals/${convertDeal._id}`)} variant="outlined" sx={{ mt: 1 }}>
                   View Deal
                 </Button>
               </Alert>

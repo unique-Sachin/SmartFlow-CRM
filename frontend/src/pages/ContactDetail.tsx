@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Typography, Paper, Box, CircularProgress, Button,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Alert
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Alert, Tooltip
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -58,7 +58,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const ContactDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [contact, setContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -246,8 +246,30 @@ const ContactDetail: React.FC = () => {
             {contact.firstName} {contact.lastName}
           </Typography>
           <Box>
-            <Button variant="outlined" onClick={handleEditOpen} sx={{ mr: 1 }}>Edit</Button>
-            <Button variant="outlined" color="error" onClick={() => setDeleteConfirmOpen(true)}>Delete</Button>
+            <Tooltip title={user && user.role === 'lead_specialist' ? 'Not allowed for Lead Specialist' : 'Edit Contact'}>
+              <span>
+                <Button
+                  variant="outlined"
+                  onClick={handleEditOpen}
+                  sx={{ mr: 1 }}
+                  disabled={!!(user && user.role === 'lead_specialist')}
+                >
+                  Edit
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip title={user && user.role === 'lead_specialist' ? 'Not allowed for Lead Specialist' : 'Delete Contact'}>
+              <span>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  disabled={!!(user && user.role === 'lead_specialist')}
+                >
+                  Delete
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </Box>
         <Typography>Email: {contact.email}</Typography>

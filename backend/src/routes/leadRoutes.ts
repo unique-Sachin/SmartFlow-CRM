@@ -15,14 +15,14 @@ router.put('/:id', authenticate, authorize('super_admin', 'sales_manager', 'lead
 router.delete('/:id', authenticate, authorize('super_admin', 'sales_manager'), leadController.deleteLead);
 
 // Assignment
-router.patch('/:id/assign', authenticate, authorize('super_admin', 'sales_manager'), leadController.assignLead);
+router.patch('/:id/assign', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.assignLead);
 // Scoring
 router.patch('/:id/score', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.updateScore);
 // Nurturing
 router.patch('/:id/nurturing', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.updateNurturing);
 
 // Convert Lead to Deal/Contact
-router.post('/:id/convert', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), convertLead);
+router.post('/:id/convert', authenticate, authorize('super_admin', 'sales_manager', 'sales_representative'), convertLead);
 
 // Bulk import leads
 router.post('/import', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.importLeads);

@@ -10,6 +10,10 @@ interface CustomRequest extends ExpressRequest {
 
 export const createLead = async (req: CustomRequest, res: Response, next: NextFunction) => {
   try {
+    // Sanitize assignedTo: if empty string, set to undefined
+    if (req.body.assignedTo === '') {
+      req.body.assignedTo = undefined;
+    }
     const lead = new Lead(req.body);
     await lead.save();
     // Emit socket event
@@ -54,7 +58,22 @@ export const getLeadById = async (req: ExpressRequest, res: Response, next: Next
 
 export const updateLead = async (req: CustomRequest, res: Response, next: NextFunction) => {
   try {
-    const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    let updateQuery;
+    if (req.body.assignedTo === '') {
+      // Remove assignedTo from $set, and use $unset for assignedTo
+      const { assignedTo, ...otherFields } = req.body;
+      updateQuery = {
+        $set: otherFields,
+        $unset: { assignedTo: 1 }
+      };
+    } else {
+      updateQuery = req.body;
+    }
+    const lead = await Lead.findByIdAndUpdate(
+      req.params.id,
+      updateQuery,
+      { new: true, runValidators: true }
+    );
     if (!lead) return res.status(404).json({ error: 'Lead not found' });
     // Emit socket event
     req.app.io?.emit('leadUpdated', lead);
@@ -162,7 +181,7 @@ export const importLeads = async (req: CustomRequest, res: Response, next: NextF
     if (!Array.isArray(leads) || leads.length === 0) {
       return res.status(400).json({ error: 'No leads provided' });
     }
-    const requiredFields = ['firstName', 'lastName', 'email', 'status', 'source', 'assignedTo'];
+    const requiredFields = ['firstName', 'lastName', 'email', 'status', 'source'];
     const validLeads: any[] = [];
     const errors: any[] = [];
     leads.forEach((l: any, idx: number) => {

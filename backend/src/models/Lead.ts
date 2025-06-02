@@ -113,7 +113,7 @@ const leadSchema = new Schema<ILead>({
   assignedTo: { 
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   budget: {
     amount: Number,
@@ -203,17 +203,19 @@ const leadSchema = new Schema<ILead>({
     value: Number
   },
   metadata: {
-    firstTouchpoint: { 
+    firstTouchpoint: {
       type: String,
-      required: true 
+      required: true,
+      default: 'Created'
     },
-    lastTouchpoint: { 
+    lastTouchpoint: {
       type: String,
-      required: true 
+      required: true,
+      default: 'Created'
     },
-    totalTouchpoints: { 
+    totalTouchpoints: {
       type: Number,
-      default: 0 
+      default: 0
     },
     conversionTime: Number
   }

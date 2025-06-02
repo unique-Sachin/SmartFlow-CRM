@@ -14,6 +14,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Grow from '@mui/material/Grow';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -132,6 +134,10 @@ const Deals: React.FC = () => {
     e.preventDefault();
     setAddLoading(true);
     setAddError(null);
+    let submitForm = { ...form };
+    if (user && user.role === 'sales_representative') {
+      submitForm.assignedTo = user.id;
+    }
     try {
       const res = await fetch(`${API_URL}/deals`, {
         method: 'POST',
@@ -139,7 +145,7 @@ const Deals: React.FC = () => {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(submitForm),
       });
       let data = null;
       try { data = await res.json(); } catch {}
@@ -334,19 +340,21 @@ const Deals: React.FC = () => {
                           </Typography>
                         </CardContent>
                         <CardActions sx={{ pt: 0, display: 'flex', justifyContent: 'space-between' }}>
-                          <TextField
-                            select
-                            label="Stage"
-                            value={deal.stage}
-                            size="small"
-                            onChange={e => handleStageChange(deal._id, e.target.value)}
-                            sx={{ minWidth: 100, bgcolor: '#fafafa', borderRadius: 2, fontWeight: 500 }}
-                            onClick={e => e.stopPropagation()}
-                          >
-                            {stages.map(s => (
-                              <MenuItem key={s} value={s}>{stageLabels[s]}</MenuItem>
-                            ))}
-                          </TextField>
+                          {user && user.role !== 'lead_specialist' && (
+                            <TextField
+                              select
+                              label="Stage"
+                              value={deal.stage}
+                              size="small"
+                              onChange={e => handleStageChange(deal._id, e.target.value)}
+                              sx={{ minWidth: 100, bgcolor: '#fafafa', borderRadius: 2, fontWeight: 500 }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              {stages.map(s => (
+                                <MenuItem key={s} value={s}>{stageLabels[s]}</MenuItem>
+                              ))}
+                            </TextField>
+                          )}
                         </CardActions>
                       </Card>
                     </Grow>
@@ -383,22 +391,32 @@ const Deals: React.FC = () => {
                 ))}
               </TextField>
               <TextField label="Probability" name="probability" value={form.probability} onChange={handleFormChange} required fullWidth type="number" inputProps={{ min: 0, max: 100 }} />
-              <TextField label="Expected Close Date" name="expectedCloseDate" value={form.expectedCloseDate} onChange={handleFormChange} required fullWidth type="date" InputLabelProps={{ shrink: true }} />
-              <TextField
-                select
-                label="Assigned To"
-                name="assignedTo"
-                value={form.assignedTo}
-                onChange={handleFormChange}
-                required
-                fullWidth
-              >
-                {users.map(user => (
-                  <MenuItem key={user._id} value={user._id}>
-                    {user.firstName} {user.lastName} ({user.email})
-                  </MenuItem>
-                ))}
-              </TextField>
+              <DatePicker
+                label="Expected Close Date"
+                value={form.expectedCloseDate ? dayjs(form.expectedCloseDate, 'YYYY-MM-DD') : null}
+                onChange={date => setForm(f => ({ ...f, expectedCloseDate: date ? date.format('YYYY-MM-DD') : '' }))}
+                format="DD/MM/YY"
+                slotProps={{ textField: { required: true, fullWidth: true } }}
+              />
+              {/* Assigned To: Only show for super_admin and sales_manager, and only allow assigning to super_admin, sales_manager, or sales_representative */}
+              {user && ['super_admin', 'sales_manager'].includes(user.role) ? (
+                <TextField
+                  select
+                  label="Assigned To"
+                  name="assignedTo"
+                  value={form.assignedTo}
+                  onChange={handleFormChange}
+                  required
+                  fullWidth
+                >
+                  {users.filter(u => (u as any).role && ['super_admin', 'sales_manager', 'sales_representative'].includes((u as any).role)).map(userOption => (
+                    <MenuItem key={userOption._id} value={userOption._id}>
+                      {userOption.firstName} {userOption.lastName}
+                      {user && userOption._id === user.id ? ' (You)' : ''} ({userOption.email})
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : null}
               <TextField
                 select
                 label="Contact"

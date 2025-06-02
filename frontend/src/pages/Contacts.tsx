@@ -57,6 +57,10 @@ const Contacts: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState<any>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user, token } = useAuth();
 
@@ -142,6 +146,12 @@ const Contacts: React.FC = () => {
     }
   };
 
+  const handleEditClick = (contact: Contact) => {
+    setEditForm({ ...contact });
+    setEditError(null);
+    setEditOpen(true);
+  };
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>Contacts</Typography>
@@ -172,7 +182,9 @@ const Contacts: React.FC = () => {
                     },
                     px: { xs: 1, sm: 2 },
                     py: { xs: 1, sm: 1.5 },
+                    cursor: 'pointer',
                   }}
+                  onClick={() => navigate(`/contacts/${contact._id}`)}
                 >
                   <ListItemText
                     primary={<Typography fontWeight={600} fontSize={{ xs: 15, sm: 17 }}>{contact.firstName} {contact.lastName}</Typography>}
@@ -180,8 +192,33 @@ const Contacts: React.FC = () => {
                       <span>Email: {contact.email}</span> | <span>Status: {contact.status}</span> | <span>Company: {contact.company || 'N/A'}</span>
                     </>}
                   />
-                  <Tooltip title="Edit Contact"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => navigate(`/contacts/${contact._id}`)}><EditIcon /></IconButton></Tooltip>
-                  <Tooltip title="Delete Contact"><IconButton color="error" sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => setDeleteId(contact._id)}><DeleteIcon /></IconButton></Tooltip>
+                  {user && (
+                    <>
+                      <Tooltip title={user.role === 'lead_specialist' ? 'Not allowed for Lead Specialist' : 'Edit Contact'}>
+                        <span>
+                          <IconButton
+                            sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }}
+                            onClick={e => { e.stopPropagation(); if (user.role !== 'lead_specialist') handleEditClick(contact); }}
+                            disabled={user.role === 'lead_specialist'}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title={user.role === 'lead_specialist' ? 'Not allowed for Lead Specialist' : 'Delete Contact'}>
+                        <span>
+                          <IconButton
+                            color="error"
+                            sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }}
+                            onClick={e => { e.stopPropagation(); if (user.role !== 'lead_specialist') setDeleteId(contact._id); }}
+                            disabled={user.role === 'lead_specialist'}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </>
+                  )}
                 </ListItem>
               </Grow>
             ))}
@@ -224,6 +261,54 @@ const Contacts: React.FC = () => {
             <Button onClick={handleAddClose} disabled={addLoading}>Cancel</Button>
             <Button type="submit" variant="contained" color="primary" disabled={addLoading}>
               {addLoading ? 'Adding...' : 'Add Contact'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Contact</DialogTitle>
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          setEditLoading(true);
+          setEditError(null);
+          try {
+            const res = await fetch(`${API_URL}/contacts/${editForm._id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify(editForm),
+            });
+            let data = null;
+            try { data = await res.json(); } catch {}
+            if (!res.ok) {
+              throw new Error(data?.errors?.[0]?.msg || data?.error || 'Failed to update contact');
+            }
+            setEditOpen(false);
+            fetchContacts();
+          } catch (err: any) {
+            setEditError(err.message || 'Unknown error');
+          } finally {
+            setEditLoading(false);
+          }
+        }}>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField label="First Name" name="firstName" value={editForm?.firstName || ''} onChange={e => setEditForm({ ...editForm, firstName: e.target.value })} required fullWidth />
+            <TextField label="Last Name" name="lastName" value={editForm?.lastName || ''} onChange={e => setEditForm({ ...editForm, lastName: e.target.value })} required fullWidth />
+            <TextField label="Email" name="email" value={editForm?.email || ''} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required fullWidth type="email" />
+            <TextField label="Company" name="company" value={editForm?.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} fullWidth />
+            <TextField select label="Status" name="status" value={editForm?.status || 'lead'} onChange={e => setEditForm({ ...editForm, status: e.target.value })} fullWidth>
+              {statusOptions.map(opt => (
+                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+              ))}
+            </TextField>
+            {editError && <Typography color="error">{editError}</Typography>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setEditOpen(false)} disabled={editLoading}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary" disabled={editLoading}>
+              {editLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogActions>
         </form>

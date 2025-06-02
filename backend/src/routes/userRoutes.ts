@@ -46,7 +46,7 @@ const getUsers: RequestHandler = async (req, res, next) => {
   }
 };
 
-router.get('/', authenticate, authorize('super_admin', 'sales_manager'), getUsers);
+router.get('/', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'), getUsers);
 
 router.post(
   '/',
