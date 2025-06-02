@@ -22,8 +22,7 @@ export const createContactValidation: ValidationChain[] = [
     .notEmpty()
     .withMessage('Email is required')
     .isEmail()
-    .withMessage('Invalid email format')
-    .normalizeEmail(),
+    .withMessage('Invalid email format'),
   
   body('phone')
     .optional()
@@ -96,8 +95,7 @@ export const updateContactValidation: ValidationChain[] = [
     .optional()
     .trim()
     .isEmail()
-    .withMessage('Invalid email format')
-    .normalizeEmail(),
+    .withMessage('Invalid email format'),
 ];
 
 export const addInteractionValidation: ValidationChain[] = [

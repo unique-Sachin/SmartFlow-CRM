@@ -130,12 +130,11 @@ const Chat: React.FC = () => {
   return (
     <Box
       sx={{
-        minHeight: '70vh',
+        minHeight: '80vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         py: { xs: 2, md: 4 },
-        px: 1,
       }}
     >
       <Paper
@@ -143,8 +142,8 @@ const Chat: React.FC = () => {
         sx={{
           width: '100%',
           maxWidth: 950,
-          minHeight: 500,
-          maxHeight: 500,
+          minHeight: 430,
+          maxHeight: 430,
           display: 'flex',
           overflow: 'hidden',
           boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)',

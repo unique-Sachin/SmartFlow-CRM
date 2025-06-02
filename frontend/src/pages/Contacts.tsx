@@ -1,4 +1,5 @@
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import EmailIcon from '@mui/icons-material/Email';
 import {
   Alert,
   Box, Button,
@@ -61,6 +62,16 @@ const Contacts: React.FC = () => {
   const [editForm, setEditForm] = useState<any>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [mailOpen, setMailOpen] = useState(false);
+  const [mailLoading, setMailLoading] = useState(false);
+  const [mailError, setMailError] = useState<string | null>(null);
+  const [mailSuccess, setMailSuccess] = useState<string | null>(null);
+  const [mailSubject, setMailSubject] = useState('');
+  const [mailMessage, setMailMessage] = useState('');
+  const [mailPrompt, setMailPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const navigate = useNavigate();
   const { user, token } = useAuth();
 
@@ -152,6 +163,70 @@ const Contacts: React.FC = () => {
     setEditOpen(true);
   };
 
+  const handleMailClick = (contact: Contact) => {
+    setSelectedContact(contact);
+    setMailSubject('');
+    setMailMessage('');
+    setMailPrompt('');
+    setMailError(null);
+    setMailSuccess(null);
+    setAiError(null);
+    setMailOpen(true);
+  };
+
+  const handleSendMail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedContact) return;
+    setMailLoading(true);
+    setMailError(null);
+    setMailSuccess(null);
+    try {
+      const res = await fetch(`${API_URL}/contacts/${selectedContact._id}/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ subject: mailSubject, message: mailMessage }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to send email');
+      setMailSuccess('Email sent successfully!');
+      setMailOpen(false);
+    } catch (err: any) {
+      setMailError(err.message || 'Unknown error');
+    } finally {
+      setMailLoading(false);
+    }
+  };
+
+  const handleAIGenerate = async () => {
+    if (!selectedContact || !mailPrompt.trim()) {
+      setAiError('Please enter a prompt for the AI.');
+      return;
+    }
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch(`${API_URL}/ai/generate-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ prompt: mailPrompt, lead: selectedContact }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'AI failed to generate email');
+      setMailSubject(data.subject || '');
+      setMailMessage(data.message || '');
+    } catch (err: any) {
+      setAiError(err.message || 'Unknown error');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>Contacts</Typography>
@@ -194,6 +269,13 @@ const Contacts: React.FC = () => {
                   />
                   {user && (
                     <>
+                      {user.role !== 'lead_specialist' && (
+                        <Tooltip title="Send Email">
+                          <IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={e => { e.stopPropagation(); handleMailClick(contact); }}>
+                            <EmailIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       <Tooltip title={user.role === 'lead_specialist' ? 'Not allowed for Lead Specialist' : 'Edit Contact'}>
                         <span>
                           <IconButton
@@ -309,6 +391,44 @@ const Contacts: React.FC = () => {
             <Button onClick={() => setEditOpen(false)} disabled={editLoading}>Cancel</Button>
             <Button type="submit" variant="contained" color="primary" disabled={editLoading}>
               {editLoading ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+      <Dialog open={mailOpen} onClose={() => setMailOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Send Email to Contact</DialogTitle>
+        <form onSubmit={handleSendMail}>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField label="To" value={selectedContact?.email || ''} fullWidth InputProps={{ readOnly: true }} margin="normal" />
+            <Box display="flex" gap={1} alignItems="center">
+              <TextField
+                label="AI Prompt (describe the purpose/tone)"
+                value={mailPrompt}
+                onChange={e => setMailPrompt(e.target.value)}
+                fullWidth
+                size="small"
+                placeholder="e.g. Follow up after demo, friendly and concise"
+                disabled={aiLoading}
+              />
+              <Button
+                variant="outlined"
+                onClick={handleAIGenerate}
+                disabled={aiLoading || !mailPrompt.trim()}
+                sx={{ minWidth: 140 }}
+              >
+                {aiLoading ? 'Generating...' : 'Generate with AI'}
+              </Button>
+            </Box>
+            {aiError && <Alert severity="error">{aiError}</Alert>}
+            <TextField label="Subject" value={mailSubject} onChange={e => setMailSubject(e.target.value)} fullWidth required margin="normal" />
+            <TextField label="Message" value={mailMessage} onChange={e => setMailMessage(e.target.value)} fullWidth required margin="normal" multiline minRows={4} />
+            {mailError && <Alert severity="error">{mailError}</Alert>}
+            {mailSuccess && <Alert severity="success">{mailSuccess}</Alert>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setMailOpen(false)} disabled={mailLoading}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary" disabled={mailLoading}>
+              {mailLoading ? 'Sending...' : 'Send'}
             </Button>
           </DialogActions>
         </form>

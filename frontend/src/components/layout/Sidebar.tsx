@@ -71,7 +71,7 @@ const navigationItems = [
   { text: 'Reporting', icon: <AssessmentIcon />, path: '/reporting' },
   { text: 'AI Coach', icon: <LightbulbIcon />, path: '/ai-coach' },
   { text: 'Chat', icon: <ChatBubbleOutlineIcon />, path: '/chat' },
-  { text: 'Email', icon: <EmailIcon />, path: '/email' },
+  { text: 'Emails', icon: <EmailIcon />, path: '/emails' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ];
 

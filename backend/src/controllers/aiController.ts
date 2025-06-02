@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Deal } from '../models/Deal';
 import { Lead } from '../models/Lead';
 import { Contact } from '../models/Contact';
-import { getDealCoachAdvice, getPersonaProfile, getObjectionResponses, getWinLossExplanation } from '../services/aiService';
+import { getDealCoachAdvice, getPersonaProfile, getObjectionResponses, getWinLossExplanation, generateEmailWithAI } from '../services/aiService';
 
 export const dealCoach = async (req: Request, res: Response) => {
   const { dealId } = req.params;
@@ -93,5 +93,17 @@ export const aiCoach = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AI Coach error:', error.message);
     res.status(500).json({ error: 'Failed to get AI Coach answer' });
+  }
+};
+
+export const generateEmail = async (req: Request, res: Response) => {
+  const { prompt, lead } = req.body;
+  if (!prompt || !lead) return res.status(400).json({ error: 'Prompt and lead are required' });
+  try {
+    const result = await generateEmailWithAI(prompt, lead);
+    res.json(result);
+  } catch (error: any) {
+    console.error('AI Email Generation error:', error.message);
+    res.status(500).json({ error: 'Failed to generate email with AI' });
   }
 }; 

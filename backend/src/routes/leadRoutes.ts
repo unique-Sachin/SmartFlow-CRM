@@ -27,4 +27,7 @@ router.post('/:id/convert', authenticate, authorize('super_admin', 'sales_manage
 // Bulk import leads
 router.post('/import', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.importLeads);
 
+// Send email to lead
+router.post('/:id/send-email', authenticate, authorize('super_admin', 'sales_manager', 'lead_specialist'), leadController.sendEmailToLead);
+
 export default router; 

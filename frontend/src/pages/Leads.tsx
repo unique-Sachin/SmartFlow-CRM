@@ -5,6 +5,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import StarIcon from '@mui/icons-material/Star';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import EmailIcon from '@mui/icons-material/Email';
 import {
   Alert,
   Box, Button,
@@ -108,6 +109,15 @@ const Leads: React.FC = () => {
   const [importLoading, setImportLoading] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importedLeads, setImportedLeads] = useState<any[]>([]);
+  const [mailOpen, setMailOpen] = useState(false);
+  const [mailLoading, setMailLoading] = useState(false);
+  const [mailError, setMailError] = useState<string | null>(null);
+  const [mailSuccess, setMailSuccess] = useState<string | null>(null);
+  const [mailSubject, setMailSubject] = useState('');
+  const [mailMessage, setMailMessage] = useState('');
+  const [mailPrompt, setMailPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -482,6 +492,71 @@ const Leads: React.FC = () => {
     }
   };
 
+  // Open mail modal for a lead
+  const handleMailClick = (lead: any) => {
+    setSelectedLead(lead);
+    setMailSubject('');
+    setMailMessage('');
+    setMailError(null);
+    setMailSuccess(null);
+    setMailOpen(true);
+  };
+
+  // Send mail API call
+  const handleSendMail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedLead) return;
+    setMailLoading(true);
+    setMailError(null);
+    setMailSuccess(null);
+    try {
+      const res = await fetch(`${API_URL}/leads/${selectedLead._id}/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ subject: mailSubject, message: mailMessage }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to send email');
+      setMailSuccess('Email sent successfully!');
+      setMailOpen(false);
+    } catch (err: any) {
+      setMailError(err.message || 'Unknown error');
+    } finally {
+      setMailLoading(false);
+    }
+  };
+
+  // AI email generation
+  const handleAIGenerate = async () => {
+    if (!selectedLead || !mailPrompt.trim()) {
+      setAiError('Please enter a prompt for the AI.');
+      return;
+    }
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch(`${API_URL}/ai/generate-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ prompt: mailPrompt, lead: selectedLead }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'AI failed to generate email');
+      setMailSubject(data.subject || '');
+      setMailMessage(data.message || '');
+    } catch (err: any) {
+      setAiError(err.message || 'Unknown error');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (!user || !['super_admin', 'sales_manager', 'lead_specialist', 'sales_representative'].includes(user.role)) {
     return <Container sx={{ mt: 4 }}><Alert severity="error">Access denied.</Alert></Container>;
   }
@@ -561,6 +636,7 @@ const Leads: React.FC = () => {
                     <Tooltip title="Assign Lead"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleAssignClick(lead)}><AssignmentIndIcon /></IconButton></Tooltip>
                     <Tooltip title="Update Score"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleScoreClick(lead)}><StarIcon /></IconButton></Tooltip>
                     <Tooltip title="Nurturing"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleNurtureClick(lead)}><TrackChangesIcon /></IconButton></Tooltip>
+                    <Tooltip title="Send Email"><IconButton sx={{ transition: 'transform 0.18s', '&:hover': { transform: 'scale(1.15)' } }} onClick={() => handleMailClick(lead)}><EmailIcon /></IconButton></Tooltip>
                   </>}
                   {/* AI Persona Profile is available to all */}
                   <Tooltip title="AI Persona Profile">
@@ -816,6 +892,45 @@ const Leads: React.FC = () => {
             {importLoading ? 'Importing...' : 'Import'}
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* Mail Lead Dialog */}
+      <Dialog open={mailOpen} onClose={() => setMailOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Send Email to Lead</DialogTitle>
+        <form onSubmit={handleSendMail}>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField label="To" value={selectedLead?.email || ''} fullWidth InputProps={{ readOnly: true }} margin="normal" />
+            <Box display="flex" gap={1} alignItems="center">
+              <TextField
+                label="AI Prompt (describe the purpose/tone)"
+                value={mailPrompt}
+                onChange={e => setMailPrompt(e.target.value)}
+                fullWidth
+                size="small"
+                placeholder="e.g. Follow up after demo, friendly and concise"
+                disabled={aiLoading}
+              />
+              <Button
+                variant="outlined"
+                onClick={handleAIGenerate}
+                disabled={aiLoading || !mailPrompt.trim()}
+                sx={{ minWidth: 140 }}
+              >
+                {aiLoading ? 'Generating...' : 'Generate with AI'}
+              </Button>
+            </Box>
+            {aiError && <Alert severity="error">{aiError}</Alert>}
+            <TextField label="Subject" value={mailSubject} onChange={e => setMailSubject(e.target.value)} fullWidth required margin="normal" />
+            <TextField label="Message" value={mailMessage} onChange={e => setMailMessage(e.target.value)} fullWidth required margin="normal" multiline minRows={4} />
+            {mailError && <Alert severity="error">{mailError}</Alert>}
+            {mailSuccess && <Alert severity="success">{mailSuccess}</Alert>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setMailOpen(false)} disabled={mailLoading}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary" disabled={mailLoading}>
+              {mailLoading ? 'Sending...' : 'Send'}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </Container>
   );

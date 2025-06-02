@@ -19,6 +19,7 @@ import NotFound from './pages/NotFound';
 import Documents from './pages/Documents';
 import AICoach from './pages/AICoach';
 import Chat from './pages/Chat';
+import Emails from './pages/Emails';
 
 function App() {
   // Layout for all protected routes
@@ -51,6 +52,7 @@ function App() {
               <Route path="/documents" element={<Documents />} />
               <Route path="/ai-coach" element={<AICoach />} />
               <Route path="/chat" element={<Chat />} />
+              <Route path="/emails" element={<Emails />} />
               <Route path="*" element={<NotFound />} />
               {/* Add more protected routes here */}
             </Route>

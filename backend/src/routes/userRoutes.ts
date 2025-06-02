@@ -8,7 +8,7 @@ const router = Router();
 
 // Registration validation middleware
 const registerValidation = [
-  body('email').isEmail().normalizeEmail(),
+  body('email').isEmail(),
   body('password').isLength({ min: 8 }),
   body('firstName').notEmpty().trim(),
   body('lastName').notEmpty().trim(),
@@ -53,7 +53,7 @@ router.post(
   authenticate,
   authorize('super_admin'),
   [
-    body('email').isEmail().normalizeEmail(),
+    body('email').isEmail(),
     body('password').isLength({ min: 8 }),
     body('firstName').notEmpty().trim(),
     body('lastName').notEmpty().trim(),

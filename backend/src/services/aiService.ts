@@ -149,4 +149,33 @@ export async function getAICoachAnswer(question: string): Promise<{ answer: stri
     console.error('OpenAI API error:', error.response?.data || error.message);
     throw new Error('Failed to get AI Coach answer');
   }
+}
+
+export async function generateEmailWithAI(prompt: string, lead: any): Promise<{ subject: string; message: string }> {
+  if (!OPENAI_API_KEY) throw new Error('OpenAI API key not set');
+  try {
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: 'You are an expert sales email assistant. Given a lead and a prompt, generate a professional email subject and message. Respond in JSON: {"subject": string, "message": string }.' },
+          { role: 'user', content: `Lead: ${JSON.stringify(lead)}\nPrompt: ${prompt}` }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const content = response.data.choices[0].message.content;
+    const result = JSON.parse(content);
+    return result;
+  } catch (error: any) {
+    console.error('OpenAI API error:', error.response?.data || error.message);
+    throw new Error('Failed to generate email with AI');
+  }
 } 

@@ -1,16 +1,23 @@
 import nodemailer from 'nodemailer';
 import { IUser } from '../models/User';
+import dotenv from 'dotenv';
+import { EmailLog } from '../models/EmailLog';
+dotenv.config();
 
 // For development, we'll use a test SMTP service
 // In production, replace with real SMTP credentials
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER || 'test@ethereal.email',
-    pass: process.env.SMTP_PASS || 'testpassword',
-  },
+  service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    secure: true,
+    port: 465,
+    host: 'smtp.gmail.com'
 });
 
 export const sendVerificationEmail = async (user: IUser, verificationToken: string) => {
@@ -93,6 +100,49 @@ export const sendPasswordResetEmail = async (user: IUser, resetToken: string) =>
     return info;
   } catch (error) {
     console.error('Error sending password reset email:', error);
+    throw error;
+  }
+};
+
+export const sendCustomEmail = async (
+  to: string,
+  subject: string,
+  message: string,
+  sentBy: any = null,
+  type: string = 'manual',
+  relatedEntity: any = null
+) => {
+  const mailOptions = {
+    from: process.env.SMTP_FROM || '"SmartFlow CRM" <noreply@smartflow.com>',
+    to,
+    subject,
+    html: `<div style='font-family:sans-serif;font-size:16px;'>${message.replace(/\n/g, '<br>')}</div>`
+  };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    await EmailLog.create({
+      to,
+      subject,
+      body: message,
+      sentBy,
+      status: 'sent',
+      type,
+      relatedEntity,
+      sentAt: new Date()
+    });
+    return info;
+  } catch (error) {
+    await EmailLog.create({
+      to,
+      subject,
+      body: message,
+      sentBy,
+      status: 'failed',
+      type,
+      relatedEntity,
+      error: (error as any).message,
+      sentAt: new Date()
+    });
     throw error;
   }
 }; 

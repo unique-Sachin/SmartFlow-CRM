@@ -22,8 +22,7 @@ export const createLeadValidation: ValidationChain[] = [
     .notEmpty()
     .withMessage('Email is required')
     .isEmail()
-    .withMessage('Invalid email format')
-    .normalizeEmail(),
+    .withMessage('Invalid email format'),
 
   body('phone')
     .optional()

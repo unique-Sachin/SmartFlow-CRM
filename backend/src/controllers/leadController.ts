@@ -3,6 +3,7 @@ import { Lead } from '../models/Lead';
 import { Deal } from '../models/Deal';
 import { Contact } from '../models/Contact';
 import type { Server as SocketIOServer } from 'socket.io';
+import { sendCustomEmail } from '../services/emailService';
 
 interface CustomRequest extends ExpressRequest {
   app: ExpressRequest['app'] & { io?: SocketIOServer };
@@ -212,6 +213,25 @@ export const importLeads = async (req: CustomRequest, res: Response, next: NextF
       failed: errors.length,
       errors
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendEmailToLead = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const { subject, message } = req.body;
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Subject and message are required' });
+    }
+    const lead = await Lead.findById(req.params.id);
+    if (!lead) return res.status(404).json({ error: 'Lead not found' });
+    await sendCustomEmail(lead.email, subject, message);
+    // Log as activity
+    if ((lead as any).addActivity) {
+      await (lead as any).addActivity('email', `Sent email: ${subject}`);
+    }
+    res.json({ message: 'Email sent successfully' });
   } catch (error) {
     next(error);
   }

@@ -14,6 +14,7 @@ import dealRoutes from './routes/dealRoutes';
 import leadRoutes from './routes/leadRoutes';
 import reportingRoutes from './routes/reportingRoutes';
 import aiRoutes from './routes/aiRoutes';
+import emailRoutes from './routes/emailRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/deals', dealRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/reporting', reportingRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/emails', emailRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

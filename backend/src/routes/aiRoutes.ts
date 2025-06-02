@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
-import { dealCoach, personaProfile, objectionHandler, winLossExplainer } from '../controllers/aiController';
+import { dealCoach, personaProfile, objectionHandler, winLossExplainer, generateEmail } from '../controllers/aiController';
 
 const router = Router();
 
@@ -18,5 +18,8 @@ router.get('/win-loss-explainer/:dealId', authenticate, winLossExplainer);
 
 // POST /api/ai/coach
 router.post('/coach', authenticate, require('../controllers/aiController').aiCoach);
+
+// POST /api/ai/generate-email
+router.post('/generate-email', authenticate, generateEmail);
 
 export default router; 

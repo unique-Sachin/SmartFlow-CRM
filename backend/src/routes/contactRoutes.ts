@@ -23,5 +23,7 @@ router.put('/:id', authenticate, authorize('super_admin', 'sales_manager', 'sale
 router.delete('/:id', authenticate, authorize('super_admin', 'sales_manager', 'sales_representative'), validateContactId, ContactController.delete);
 // Add interaction to contact
 router.post('/:id/interactions', validateContactId, validate(addInteractionValidation), ContactController.addInteraction);
+// Send email to contact
+router.post('/:id/send-email', authenticate, authorize('super_admin', 'sales_manager', 'sales_representative'), ContactController.sendEmailToContact);
 
 export default router; 

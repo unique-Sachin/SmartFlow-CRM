@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Contact } from '../models/Contact';
 import { Types } from 'mongoose';
+import { sendCustomEmail } from '../services/emailService';
 
 export class ContactController {
   // Create a new contact
@@ -92,6 +93,26 @@ export class ContactController {
       res.json(contact);
     } catch (error) {
       res.status(500).json({ error: 'Error adding interaction', details: error });
+    }
+  }
+
+  // Send email to contact
+  static async sendEmailToContact(req: Request, res: Response) {
+    try {
+      const { subject, message } = req.body;
+      if (!subject || !message) {
+        return res.status(400).json({ error: 'Subject and message are required' });
+      }
+      const contact = await Contact.findById(req.params.id);
+      if (!contact) return res.status(404).json({ error: 'Contact not found' });
+      await sendCustomEmail(contact.email, subject, message);
+      // Log as interaction
+      if ((contact as any).addInteraction) {
+        await (contact as any).addInteraction('email', `Sent email: ${subject}`);
+      }
+      res.json({ message: 'Email sent successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to send email', details: error });
     }
   }
 } 
