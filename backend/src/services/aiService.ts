@@ -123,7 +123,7 @@ export async function getWinLossExplanation(prompt: string): Promise<{ explanati
   }
 }
 
-export async function getAICoachAnswer(question: string): Promise<{ answer: string }> {
+export async function getAICoachAnswer(question: string): Promise<string> {
   if (!OPENAI_API_KEY) throw new Error('OpenAI API key not set');
   try {
     const response = await axios.post(
@@ -131,7 +131,6 @@ export async function getAICoachAnswer(question: string): Promise<{ answer: stri
       {
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: 'You are a helpful CRM assistant. Answer user questions about CRM features, best practices, and how to use the system.' },
           { role: 'user', content: question }
         ],
         temperature: 0.7
@@ -143,11 +142,11 @@ export async function getAICoachAnswer(question: string): Promise<{ answer: stri
         }
       }
     );
-    const content = response.data.choices[0].message.content;
-    return { answer: content };
+    const content = response.data.choices[0].message.content.trim();
+    return content;
   } catch (error: any) {
     console.error('OpenAI API error:', error.response?.data || error.message);
-    throw new Error('Failed to get AI Coach answer');
+    throw new Error("API LIMIT REACHED...");
   }
 }
 
@@ -177,5 +176,33 @@ export async function generateEmailWithAI(prompt: string, lead: any): Promise<{ 
   } catch (error: any) {
     console.error('OpenAI API error:', error.response?.data || error.message);
     throw new Error('Failed to generate email with AI');
+  }
+}
+
+export async function getHumanAnswerFromResults(question: string, results: any): Promise<string> {
+  if (!OPENAI_API_KEY) throw new Error('OpenAI API key not set');
+  try {
+    const prompt = `You are a helpful assistant. If the MongoDB results are empty or not relevant, answer the user's question in a general, helpful way. Otherwise, answer based on the results.\n\nUser's question: ${question}\nMongoDB results: ${JSON.stringify(results, null, 2)}\n\nAnswer:`;
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const content = response.data.choices[0].message.content.trim();
+    return content;
+  } catch (error: any) {
+    console.error('OpenAI API error:', error.response?.data || error.message);
+    throw new Error("API LIMIT REACHED...");
   }
 } 

@@ -2,7 +2,45 @@ import { Request, Response } from 'express';
 import { Deal } from '../models/Deal';
 import { Lead } from '../models/Lead';
 import { Contact } from '../models/Contact';
-import { getDealCoachAdvice, getPersonaProfile, getObjectionResponses, getWinLossExplanation, generateEmailWithAI } from '../services/aiService';
+import { getDealCoachAdvice, getPersonaProfile, getObjectionResponses, getWinLossExplanation, generateEmailWithAI, getAICoachAnswer, getHumanAnswerFromResults } from '../services/aiService';
+import fs from 'fs';
+import path from 'path';
+import { User } from '../models/User';
+import { EmailLog } from '../models/EmailLog';
+import { ChatMessage } from '../models/ChatMessage';
+
+// Schema descriptions for AI prompt context
+const leadSchemaDescription = `The Lead model has these fields: firstName (string), lastName (string), email (string), phone (string), company (string), jobTitle (string), source (string), status (string), score (number), assignedTo (ObjectId), budget (object), requirements (string), interests (array), timeline (string), leadMagnet (string), campaign (string), nurturingSequence (string), activities (array), customFields (object), tags (array), location (object), socialProfiles (object), qualificationCriteria (object), conversionDetails (object), metadata (object), createdAt (Date), updatedAt (Date).`;
+
+const dealSchemaDescription = `The Deal model has these fields: title (string), value (number), currency (string), stage (string), probability (number), expectedCloseDate (Date), actualCloseDate (Date), contact (ObjectId), company (ObjectId), assignedTo (ObjectId), products (array), activities (array), notes (string), tags (array), customFields (object), priority (string), lossReason (string), winReason (string), competitors (array), documents (array), createdAt (Date), updatedAt (Date).`;
+
+const userSchemaDescription = `The User model has these fields: email (string), password (string), firstName (string), lastName (string), role (string), isActive (boolean), isEmailVerified (boolean), emailVerificationToken (string), emailVerificationExpires (Date), passwordResetToken (string), passwordResetExpires (Date), lastLogin (Date), createdAt (Date), updatedAt (Date).`;
+
+const contactSchemaDescription = `The Contact model has these fields: firstName (string), lastName (string), email (string), phone (string), company (string), position (string), status (string), source (string), assignedTo (ObjectId), tags (array), notes (string), address (object), socialProfiles (object), interactions (array), preferences (object), lastContactDate (Date), nextFollowUp (Date), createdAt (Date), updatedAt (Date).`;
+
+const emailLogSchemaDescription = `The EmailLog model has these fields: to (string), subject (string), body (string), sentBy (ObjectId), sentAt (Date), status (string), type (string), relatedEntity (object), error (string), createdAt (Date), updatedAt (Date).`;
+
+const chatMessageSchemaDescription = `The ChatMessage model has these fields: sender (ObjectId), receiver (ObjectId), content (string), timestamp (Date), status (string).`;
+
+const allSchemas = `
+Available models and their schema:
+
+Lead: ${leadSchemaDescription}
+Deal: ${dealSchemaDescription}
+Contact: ${contactSchemaDescription}
+User: ${userSchemaDescription}
+EmailLog: ${emailLogSchemaDescription}
+ChatMessage: ${chatMessageSchemaDescription}
+`;
+
+const modelMap: Record<string, any> = {
+  Lead,
+  Deal,
+  Contact,
+  User,
+  EmailLog,
+  ChatMessage,
+};
 
 export const dealCoach = async (req: Request, res: Response) => {
   const { dealId } = req.params;
@@ -87,12 +125,40 @@ export const aiCoach = async (req: Request, res: Response) => {
   const { question } = req.body;
   if (!question) return res.status(400).json({ error: 'Question is required' });
   try {
-    const { getAICoachAnswer } = require('../services/aiService');
-    const result = await getAICoachAnswer(question);
-    res.json(result);
+    const prompt = `
+    You are an expert in converting user questions into MongoDB aggregation pipelines.
+    Given the following user question, output a JSON object with two fields:
+    - "model": the name of the collection/model to query (e.g., "Lead", "Deal", "Contact", etc.)
+    - "pipeline": the MongoDB aggregation pipeline as an array
+
+    Only output valid JSON. Do not include any explanations or code blocks.
+
+    ${allSchemas}
+
+    User question: ${question}
+    Output:
+    `;
+
+   
+    const aiResponse = await getAICoachAnswer(prompt);
+
+    let parsed = JSON.parse(aiResponse);
+    const { model, pipeline } = parsed;
+    // 2. Run the aggregation pipeline on the Lead collection
+    let results
+    try {
+      results = await modelMap[model].aggregate(pipeline);
+    } catch (error: any) {
+      console.error('AI Coach error:', error.message);
+      results = []
+    }
+    // console.log(parsed, results)
+    const answer = await getHumanAnswerFromResults(question, results);
+    // 4. Return the answer, results, and pipeline
+    res.json({  results, pipeline, answer });
   } catch (error: any) {
     console.error('AI Coach error:', error.message);
-    res.status(500).json({ error: 'Failed to get AI Coach answer' });
+    res.status(500).json({ error: error.message });
   }
 };
 
