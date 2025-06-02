@@ -128,6 +128,30 @@ SmartFlow CRM leverages advanced AI to supercharge your sales process and custom
 - **AI Coach:**  
   Ask any question about CRM features, best practices, or how to use the system, and receive instant, AI-powered guidance and suggestions.
 
+## Email Features (NEW)
+
+### Sent Emails Page
+- Access from the sidebar via the "Emails" link or at `/emails`.
+- View a searchable, filterable table of all sent emails (to, subject, sender, date, status, type).
+- Click "View" to see full email details and delivery status.
+
+### Bulk Email Tool
+- Available to Super Admin and Sales Manager roles.
+- Click "Bulk Email" on the Sent Emails page to open the tool.
+- Select multiple leads/contacts as recipients.
+- Compose subject and message, or use AI to generate them.
+- See per-recipient send results after sending.
+
+### AI-Powered Email Generation
+- In both single and bulk email modals, enter a prompt (e.g., "Announce new product, friendly and concise") and click "Generate with AI".
+- The AI will generate a professional subject and message, which you can edit before sending.
+
+### Email Logging
+- All emails (manual, bulk, AI-generated) are logged in the system.
+- The Sent Emails page shows all logs, including status (sent/failed) and error messages if any.
+
+### Sidebar Navigation
+- The sidebar now includes a direct link to the Sent Emails/Bulk Email page for easy access.
 
 ## Features
 
