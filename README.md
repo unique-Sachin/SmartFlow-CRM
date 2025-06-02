@@ -128,8 +128,68 @@ SmartFlow CRM leverages advanced AI to supercharge your sales process and custom
 - **AI Coach:**  
   Ask any question about CRM features, best practices, or how to use the system, and receive instant, AI-powered guidance and suggestions.
 
+
+## Features
+
+- **Role-based CRM**: Super Admin, Sales Manager, Sales Rep, Lead Specialist
+- **Leads, Deals, Contacts, Reporting, Documents, AI Coach**
+- **Real-time One-to-One Chat**:
+  - Modern, responsive chat UI (React + MUI)
+  - Message status: sent, delivered, read (with WhatsApp-style ticks)
+  - Real-time updates via Socket.IO
+  - Global in-app notifications for new messages (Snackbar)
+  - Click notification to open chat with sender from anywhere
+  - Message input auto-focuses when opening a chat
+- **Socket.IO integration**: Robust backend and frontend setup
+- **Global Notification System**: NotificationProvider for in-app alerts
+
+## Setup
+
+### Backend
+1. `cd backend`
+2. `npm install`
+3. `npm run dev` (or `npm start` for production)
+4. Ensure MongoDB is running
+
+### Frontend
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
+4. Configure `.env` for `VITE_API_URL` and `VITE_SOCKET_URL` if needed
+
+## Chat System Implementation
+
+### Backend
+- `ChatMessage` model now includes a `status` field (`sent`, `delivered`, `read`).
+- Socket.IO events:
+  - `chatMessage`: Send/receive messages, update status
+  - `messageRead`: Mark messages as read
+  - `messageStatusUpdate`: Real-time status updates
+- Online user tracking for delivery/read receipts
+
+### Frontend
+- **SocketProvider**: Provides a live Socket.IO connection to the app
+- **NotificationProvider**: Listens for chat messages globally, shows Snackbar notifications, and manages current chat user
+- **Chat Page**:
+  - User list, chat history, message input
+  - Message status icons (✓ sent, ✓✓ delivered, ✓✓ green read)
+  - Auto-focus on input when opening a chat
+  - Responsive, modern UI with MUI
+- **Global Notifications**:
+  - Snackbar appears anywhere in the app for new messages
+  - Clicking notification navigates to `/chat` and opens the correct conversation
+
+## Extending the Chat System
+- Add badges to sidebar for unread messages
+- Add typing indicators, group chat, or file sharing
+- Customize notification appearance or add sound
+
+## Usage
+- Log in as any user
+- Open the Chat page from the sidebar
+- Receive/send messages in real time
+- Get notified of new messages anywhere in the app
+
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License. 
+For more details, see the code in `src/contexts/SocketContext.tsx`, `src/contexts/NotificationContext.tsx`, and `src/pages/Chat.tsx`. 
