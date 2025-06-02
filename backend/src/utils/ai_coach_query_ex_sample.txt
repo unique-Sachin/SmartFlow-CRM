@@ -1,0 +1,60 @@
+Question 1: How many leads were created today?
+
+Query:
+[
+  { "$match": { "createdAt": { "$gte": "2024-06-01T00:00:00.000Z" } } },
+  { "$group": { "_id": null, "total_leads_added_today": { "$sum": 1 } } },
+  { "$project": { "_id": 0, "total_leads_added_today": 1 } }
+]
+
+Question 2: List all leads assigned to John Doe with status 'qualified'.
+
+Query:
+[
+  { "$match": { "assignedToName": "John Doe", "status": "qualified" } },
+  { "$project": { "firstName": 1, "lastName": 1, "email": 1, "status": 1, "assignedTo": 1, "_id": 0 } }
+]
+
+Question 3: How many deals were closed as 'won' in May 2024?
+
+Query:
+[
+  { "$match": { "stage": "closed_won", "actualCloseDate": { "$gte": "2024-05-01T00:00:00.000Z", "$lt": "2024-06-01T00:00:00.000Z" } } },
+  { "$group": { "_id": null, "total_closed_won": { "$sum": 1 } } },
+  { "$project": { "_id": 0, "total_closed_won": 1 } }
+]
+
+Question 4: List all leads interested in 'CRM Software' from the USA.
+
+Query:
+[
+  { "$match": { "interests": "CRM Software", "location.country": "USA" } },
+  { "$project": { "firstName": 1, "lastName": 1, "email": 1, "interests": 1, "location": 1, "_id": 0 } }
+]
+
+Question 5: What is the average lead score for leads created in the last 30 days?
+
+Query:
+[
+  { "$match": { "createdAt": { "$gte": "2024-05-10T00:00:00.000Z" } } },
+  { "$group": { "_id": null, "average_score": { "$avg": "$score" } } },
+  { "$project": { "_id": 0, "average_score": 1 } }
+]
+
+Question 6: Show all deals assigned to Jane Smith with a probability greater than 50%.
+
+Query:
+[
+  { "$match": { "assignedToName": "Jane Smith", "probability": { "$gt": 50 } } },
+  { "$project": { "title": 1, "probability": 1, "stage": 1, "assignedTo": 1, "_id": 0 } }
+]
+
+Question 7: List all leads tagged as 'VIP'.
+
+Query:
+[
+  { "$match": { "tags": "VIP" } },
+  { "$project": { "firstName": 1, "lastName": 1, "email": 1, "tags": 1, "_id": 0 } }
+]
+
+Each of these queries is designed to run within MongoDB's aggregation framework to extract specific information based on the user's questions. Dates are represented as ISO date strings for compatibility with JSON and MongoDB. 
