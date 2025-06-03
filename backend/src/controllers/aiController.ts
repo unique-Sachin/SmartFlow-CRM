@@ -3,8 +3,6 @@ import { Deal } from '../models/Deal';
 import { Lead } from '../models/Lead';
 import { Contact } from '../models/Contact';
 import { getDealCoachAdvice, getPersonaProfile, getObjectionResponses, getWinLossExplanation, generateEmailWithAI, getAICoachAnswer, getHumanAnswerFromResults } from '../services/aiService';
-import fs from 'fs';
-import path from 'path';
 import { User } from '../models/User';
 import { EmailLog } from '../models/EmailLog';
 import { ChatMessage } from '../models/ChatMessage';
