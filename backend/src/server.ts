@@ -71,7 +71,7 @@ io.on('connection', (socket) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port${PORT}`);
 });
 
 // Optional: Basic connection log

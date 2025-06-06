@@ -8,6 +8,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
 // Load environment variables
+// Currently not in use the actual file is src/server.ts
+
 dotenv.config();
 
 const app = express();
@@ -33,12 +35,13 @@ const startServer = async () => {
   try {
     await connectDB();
     app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+      logger.info(`Server running on port${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
+
 
 startServer(); 
