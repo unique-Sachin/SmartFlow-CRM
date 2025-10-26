@@ -4,140 +4,43 @@ dotenv.config();
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-// export async function getDealCoachAdvice(
-//   prompt: string
-// ): Promise<{ nextSteps: string; probability: number }> {
-//   if (!OPENAI_API_KEY) throw new Error("OpenAI API key not set");
-//   try {
-//     const response = await axios.post(
-//       OPENAI_API_URL,
-//       {
-//         model: "gpt-3.5-turbo",
-//         messages: [
-//           {
-//             role: "system",
-//             content:
-//               'You are a sales deal coach AI. Given deal data, provide actionable next steps and a close probability (0-100%). Respond in JSON: {"nextSteps": string, "probability": number}.',
-//           },
-//           { role: "user", content: prompt },
-//         ],
-//         temperature: 0.7,
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${OPENAI_API_KEY}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     // Parse the AI's JSON response
-//     const content = response.data.choices[0].message.content;
-//     const result = JSON.parse(content);
-//     return result;
-//   } catch (error: any) {
-//     console.error("OpenAI API error:", error.response?.data || error.message);
-//     throw new Error("Failed to get AI advice");
-//   }
-// }
+const MODEL_NAME = "gpt-4o-mini";
 
 export async function getDealCoachAdvice(
   prompt: string
 ): Promise<{ nextSteps: string; probability: number }> {
-  if (!GEMINI_API_KEY) throw new Error("Gemini API key not set");
-
+  if (!OPENAI_API_KEY) throw new Error("OpenAI API key not set");
   try {
-    const systemPrompt = `
-You are a sales deal coach AI. Given deal data, provide actionable next steps and a close probability (0-100%).
-
-Respond strictly in this JSON format without explanation:
-{
-  "nextSteps": string,
-  "probability": number
-}
-
-Prompt: ${prompt}
-    `.trim();
-
-    const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt }] }],
-      }),
-    });
-
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!content) throw new Error("No valid response from Gemini");
-
-    const cleaned = content
-      .replace(/```json/i, "") // remove ```json if present
-      .replace(/```/, "") // remove closing ```
-      .trim();
-
-    const parsed = JSON.parse(cleaned);
-    return parsed;
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: MODEL_NAME,
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are a sales deal coach AI. Given deal data, provide actionable next steps and a close probability (0-100%). Respond in JSON: {"nextSteps": string, "probability": number}.',
+          },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.2,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    // Parse the AI's JSON response
+    const content = response.data.choices[0].message.content;
+    const result = JSON.parse(content);
+    return result;
   } catch (error: any) {
-    console.error("Gemini API error:", error.message || error);
+    console.error("OpenAI API error:", error.response?.data || error.message);
     throw new Error("Failed to get AI advice");
   }
 }
-
-// export async function getPersonaProfile(
-//   prompt: string
-// ): Promise<{
-//   persona: string;
-//   traits: string[];
-//   communicationStyle: string;
-//   recommendations: string;
-// }> {
-//   try {
-//     const res = await fetch("http://localhost:11434/api/generate", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         model: "llama3:latest",
-//         prompt: `
-// You are an expert sales AI. Given lead data and interaction history, along with user's name and details generate a behavioral persona profile for a sales team. Respond in JSON format like this:
-// {"persona": string, "traits": string[], "communicationStyle": string, "recommendations": string}
-
-// Prompt: ${prompt}
-//         `.trim(),
-//       }),
-//     });
-
-//     const text = await res.text();
-
-//     // Combine partial streamed responses
-//     let combined = "";
-//     text.split("\n").forEach((line) => {
-//       if (line.trim()) {
-//         try {
-//           const json = JSON.parse(line);
-//           if (json.response) {
-//             combined += json.response;
-//           }
-//         } catch (err) {
-//           // skip malformed line
-//         }
-//       }
-//     });
-
-//     console.log("combined", combined);
-
-//     // Try parsing the final combined output as JSON
-//     const result = JSON.parse(combined);
-//     return result;
-//   } catch (error: any) {
-//     console.error("LLaMA3 API error:", error.message);
-//     throw new Error("Failed to get persona profile");
-//   }
-// }
 
 export async function getPersonaProfile(prompt: string): Promise<{
   persona: string;
@@ -145,47 +48,36 @@ export async function getPersonaProfile(prompt: string): Promise<{
   communicationStyle: string;
   recommendations: string;
 }> {
-  if (!GEMINI_API_KEY) throw new Error("Gemini API key not set");
+  if (!OPENAI_API_KEY) throw new Error("OpenAI API key not set");
 
   try {
-    const systemPrompt = `
-You are an expert sales AI. Given lead data and interaction history, generate a behavioral persona using user's details if present.
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: MODEL_NAME,
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are an expert sales AI. Given lead data and interaction history, generate a behavioral persona using user\'s details if present. Respond in JSON: {"persona": string (heading + user name if present), "traits": string[], "communicationStyle": string, "recommendations": string}.',
+          },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-Respond strictly in this JSON format:
-{
-  "persona": string (heading + user name if present),
-  "traits": string[],
-  "communicationStyle": string,
-  "recommendations": string
-}
-
-Prompt: ${prompt}
-    `.trim();
-
-    const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt }] }],
-      }),
-    });
-
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!content) throw new Error("No valid response from Gemini");
-
-    // Clean markdown-style code block if present
-    const cleaned = content
-      .replace(/```json/i, "") // remove ```json
-      .replace(/```/, "") // remove closing ```
-      .trim();
-
-    const parsed = JSON.parse(cleaned);
-
-    return parsed;
+    const content = response.data.choices[0].message.content;
+    const result = JSON.parse(content);
+    return result;
   } catch (error: any) {
-    console.error("Gemini API error:", error.message || error);
+    console.error("OpenAI API error:", error.response?.data || error.message);
     throw new Error("Failed to get persona profile");
   }
 }
@@ -198,7 +90,7 @@ export async function getObjectionResponses(
     const response = await axios.post(
       OPENAI_API_URL,
       {
-        model: "gpt-3.5-turbo",
+        model: MODEL_NAME,
         messages: [
           {
             role: "system",
@@ -233,7 +125,7 @@ export async function getWinLossExplanation(
     const response = await axios.post(
       OPENAI_API_URL,
       {
-        model: "gpt-3.5-turbo",
+        model: MODEL_NAME,
         messages: [
           {
             role: "system",
@@ -261,28 +153,35 @@ export async function getWinLossExplanation(
 }
 
 export async function getAICoachAnswer(question: string): Promise<string> {
-  if (!GEMINI_API_KEY) throw new Error("Gemini API key not set");
+  if (!OPENAI_API_KEY) throw new Error("OpenAI API key not set");
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: question }] }],
-      }),
-    });
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: MODEL_NAME,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a helpful AI coach for a CRM system. Answer questions about CRM features, sales best practices, and how to use the system effectively. Provide clear, actionable advice.",
+          },
+          { role: "user", content: question },
+        ],
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-    if (!content) throw new Error("No valid response from Gemini");
-
-    return content
-      .replace(/```json/i, "") // remove ```json if present
-      .replace(/```/, "") // remove closing ```
-      .trim();
+    const content = response.data.choices[0].message.content.trim();
+    return content;
   } catch (error: any) {
-    console.error("Gemini API error:", error.message || error);
+    console.error("OpenAI API error:", error.response?.data || error.message);
     throw new Error("Failed to get AI answer");
   }
 }
@@ -296,7 +195,7 @@ export async function generateEmailWithAI(
     const response = await axios.post(
       OPENAI_API_URL,
       {
-        model: "gpt-3.5-turbo",
+        model: MODEL_NAME,
         messages: [
           {
             role: "system",
@@ -340,7 +239,7 @@ export async function getHumanAnswerFromResults(
     const response = await axios.post(
       OPENAI_API_URL,
       {
-        model: "gpt-3.5-turbo",
+        model: MODEL_NAME,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
       },
