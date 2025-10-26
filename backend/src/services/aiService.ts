@@ -6,6 +6,21 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const MODEL_NAME = "gpt-4o-mini";
 
+// Helper function to clean AI response and extract JSON
+function cleanJsonResponse(content: string): string {
+  // Remove markdown code blocks if present
+  let cleaned = content.trim();
+  
+  // Remove ```json and ``` if present
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/```\s*$/, '');
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```\s*/, '').replace(/```\s*$/, '');
+  }
+  
+  return cleaned.trim();
+}
+
 export async function getDealCoachAdvice(
   prompt: string
 ): Promise<{ nextSteps: string; probability: number }> {
@@ -34,7 +49,8 @@ export async function getDealCoachAdvice(
     );
     // Parse the AI's JSON response
     const content = response.data.choices[0].message.content;
-    const result = JSON.parse(content);
+    const cleanedContent = cleanJsonResponse(content);
+    const result = JSON.parse(cleanedContent);
     return result;
   } catch (error: any) {
     console.error("OpenAI API error:", error.response?.data || error.message);
@@ -74,7 +90,8 @@ export async function getPersonaProfile(prompt: string): Promise<{
     );
 
     const content = response.data.choices[0].message.content;
-    const result = JSON.parse(content);
+    const cleanedContent = cleanJsonResponse(content);
+    const result = JSON.parse(cleanedContent);
     return result;
   } catch (error: any) {
     console.error("OpenAI API error:", error.response?.data || error.message);
@@ -109,7 +126,8 @@ export async function getObjectionResponses(
       }
     );
     const content = response.data.choices[0].message.content;
-    const result = JSON.parse(content);
+    const cleanedContent = cleanJsonResponse(content);
+    const result = JSON.parse(cleanedContent);
     return result;
   } catch (error: any) {
     console.error("OpenAI API error:", error.response?.data || error.message);
@@ -144,7 +162,8 @@ export async function getWinLossExplanation(
       }
     );
     const content = response.data.choices[0].message.content;
-    const result = JSON.parse(content);
+    const cleanedContent = cleanJsonResponse(content);
+    const result = JSON.parse(cleanedContent);
     return result;
   } catch (error: any) {
     console.error("OpenAI API error:", error.response?.data || error.message);
@@ -217,7 +236,8 @@ export async function generateEmailWithAI(
       }
     );
     const content = response.data.choices[0].message.content;
-    const result = JSON.parse(content);
+    const cleanedContent = cleanJsonResponse(content);
+    const result = JSON.parse(cleanedContent);
     return result;
   } catch (error: any) {
     console.error("OpenAI API error:", error.response?.data || error.message);

@@ -7,6 +7,21 @@ import { User } from '../models/User';
 import { EmailLog } from '../models/EmailLog';
 import { ChatMessage } from '../models/ChatMessage';
 
+// Helper function to clean AI response and extract JSON
+function cleanJsonResponse(content: string): string {
+  // Remove markdown code blocks if present
+  let cleaned = content.trim();
+  
+  // Remove ```json and ``` if present
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/```\s*$/, '');
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```\s*/, '').replace(/```\s*$/, '');
+  }
+  
+  return cleaned.trim();
+}
+
 // Schema descriptions for AI prompt context
 const leadSchemaDescription = `The Lead model has these fields: firstName (string), lastName (string), email (string), phone (string), company (string), jobTitle (string), source (string), status (string), score (number), assignedTo (ObjectId), budget (object), requirements (string), interests (array), timeline (string), leadMagnet (string), campaign (string), nurturingSequence (string), activities (array), customFields (object), tags (array), location (object), socialProfiles (object), qualificationCriteria (object), conversionDetails (object), metadata (object), createdAt (Date), updatedAt (Date).`;
 
@@ -78,6 +93,7 @@ export const personaProfile = async (req: Request, res: Response) => {
     let deals = await Deal.find({ contact: contact._id });
     const prompt = `Contact details: ${JSON.stringify(contact)}. Previous lead info: ${prevLead ? JSON.stringify(prevLead) : 'None'}. All deals: ${JSON.stringify(deals)}. Based on this data and interaction history, generate a behavioral persona profile for a sales team. Respond in JSON: {"persona": string, "traits": string[], "communicationStyle": string, "recommendations": string}`;
     const aiResult = await getPersonaProfile(prompt);
+    console.log(aiResult);
     res.json(aiResult);
   } catch (error: any) {
     console.error('Persona Profile AI error:', error.message);
@@ -140,7 +156,8 @@ export const aiCoach = async (req: Request, res: Response) => {
    
     const aiResponse = await getAICoachAnswer(prompt);
 
-    let parsed = JSON.parse(aiResponse);
+    const cleanedResponse = cleanJsonResponse(aiResponse);
+    let parsed = JSON.parse(cleanedResponse);
     const { model, pipeline } = parsed;
     // 2. Run the aggregation pipeline on the Lead collection
     let results
